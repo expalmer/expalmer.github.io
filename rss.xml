@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+  <rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0" xmlns:geo="http://www.w3.org/2003/01/geo/wgs84_pos#">
+    <channel>
+      <title><![CDATA[Palmer Oliveira. Juntos Aprendemos Mais!]]></title>
+      <atom:link href="rss.xml" rel="self" type="application/rss+xml"/>
+      <link>http://expalmer.github.io</link>
+      <description><![CDATA[Blog sobre FrontEnd, Html, Css e Javascript.]]></description>
+      <image>
+        <url>http://expalmer.github.io/images/palmer.jpg</url>
+        <title>Palmer Oliveira. Juntos Aprendemos Mais!</title>
+        <link>http://expalmer.github.io</link>
+      </image>
+      <pubDate>Thu, 02 Oct 2014 22:33:08 GMT</pubDate>
+      <lastBuildDate>Thu, 02 Oct 2014 22:33:08 GMT</lastBuildDate>
+      <language>en-US</language>
+      <generator>Metalsmith custom plugin</generator>
+      <ttl>60</ttl>
+      <item>
+        <title><![CDATA[Metalsmith, um extremamente simples gerador de páginas estáticas feito em javascript]]></title>
+        <description><![CDATA[Tomei coragem e resolvi criar meu blog, e escolhi o Metalsmith por ser em javascript, minha linguagem favorita.]]></description>
+        <link>http://expalmer.github.io/metalsmith-um-extremamente-simples-gerador-de-paginas-estaticas-feito-em-javascript/</link>
+        <guid isPermaLink="true">http://expalmer.github.io/metalsmith-um-extremamente-simples-gerador-de-paginas-estaticas-feito-em-javascript/</guid>
+        <category><![CDATA[metalsmith]]></category>
+        <category><![CDATA[javascript]]></category>
+        <category><![CDATA[nodejs]]></category>
+        <dc:creator><![CDATA[Palmer Oliveira]]></dc:creator>
+        <pubDate>Wed, 24 Sep 2014 17:39:06 GMT</pubDate>
+        <content:encoded>
+          <![CDATA[<h2 id="resolvi-criar-meu-blog-e-escolhi-o-metalsmith-por-ser-em-javascript-minha-linguagem-favorita-">Resolvi criar meu blog e escolhi o Metalsmith por ser em javascript, minha linguagem favorita.</h2>
+<p>Hoje existem alguns geradores de sites estáticos super legais, como o <a href="http://jekyllrb.com/">jekyll</a>,
+mas resolvi procurar algo feito em javascript e encontrei o <a href="http://metalsmith.io/">Metalsmith</a> criado pela turma do <a href="https://segment.io/">Segment.io</a>.</p>
+<p>Vale lembrar que temos outro gerador em javascript muito bacana, o <a href="https://github.com/es6rocks/harmonic">harmonic</a> feito pelo <a href="https://twitter.com/jaydson">@jaydson</a>.
+Logo vou me aventurar no harmonic.</p>
+<h2 id="como-o-metalsmith-funciona-">Como o Metalsmith funciona ?</h2>
+<p>O Metalsmith roda com <code>nodejs</code>, então já sabe que precisa de node na sua máquina.</p>
+<p>Toda lógica do Metalsmith é manipulada através de plugins, ou seja, você simplesmente chama métodos encadeados e pronto!</p>
+<p>O Metalsmith faz 3 coisinhas:</p>
+<ol>
+<li>Lê todos os arquivos no diretório origem <code>src</code>.</li>
+<li>Chama os cada um dos métodos encadeados manipulando os arquivos.</li>
+<li>Escreve o resultado no diretótio destino <code>build</code>. ( Você escolhe o nome da pasta destino ).</li>
+</ol>
+<h2 id="vamos-criar-um-pequeno-blog-com-metalsmith-">Vamos criar um pequeno blog com Metalsmith.</h2>
+<h3 id="1-estrutura-de-arquivos-do-blog-">1 ) Estrutura de arquivos do Blog.</h3>
+<pre><code class="lang-javascript">- blog
+---- index.js
+---- package.json
+---- src
+-------- index.md
+-------- posts
+-------------- post-1.md
+-------------- post-2.md
+---- templates
+-------------- index.hbt
+-------------- posts.hbt
+</code></pre>
+<h3 id="2-package-json">2) package.json</h3>
+<pre><code class="lang-javascript">{
+  &quot;name&quot;: &quot;blog&quot;,
+  &quot;description&quot;: &quot;meu blog legal&quot;,
+  &quot;version&quot;: &quot;0.0.1&quot;,
+  &quot;dependencies&quot;: {
+    &quot;handlebars&quot;: &quot;^2.0.0&quot;,
+    &quot;metalsmith&quot;: &quot;^0.11.0&quot;,
+    &quot;metalsmith-collections&quot;: &quot;^0.6.0&quot;,
+    &quot;metalsmith-markdown&quot;: &quot;^0.2.1&quot;,
+    &quot;metalsmith-permalinks&quot;: &quot;^0.4.0&quot;,
+    &quot;metalsmith-templates&quot;: &quot;^0.5.2&quot;,
+    &quot;metasmith&quot;: &quot;0.0.1&quot;
+  }
+}
+</code></pre>
+<p>Vamos instalar o Metalsmith e mais 5 dependências essenciais para um blog bacana.</p>
+<ul>
+<li><strong>metalsmith-collections</strong>: Cria um objeto chamado <code>collections</code> com todos os posts.</li>
+<li><strong>metalsmith-markdown</strong>: Interpreta nossos arquivos <code>.md</code>.</li>
+<li><strong>metalsmith-permalinks</strong>: Muda o nome original do arquivo para uma url amigável.</li>
+<li><strong>metalsmith-templates</strong>: Permite usar um template engine.</li>
+<li><strong>handlebars</strong>: Nosso template engine.</li>
+</ul>
+<p>Aproveite e já instale as dependências. Dê o comando na raiz do diretório <code>blog</code>.</p>
+<pre><code class="lang-javascript">$ npm install
+</code></pre>
+<h2 id="agora-vamos-criar-as-nossas-p-ginas-de-fato-">Agora vamos criar as nossas páginas de fato.</h2>
+<h3 id="3-blog-src-index-md">3) blog/src/index.md</h3>
+<pre><code class="lang-javascript">---
+template: index.hbt
+---
+
+Corpo da página index
+</code></pre>
+<h3 id="4-blog-src-posts-post-1-md">4) blog/src/posts/post-1.md</h3>
+<pre><code class="lang-javascript">---
+title: Meu Primeiro Post com Metalsmith
+template: posts.hbt
+---
+
+Corpo do Post 1
+</code></pre>
+<h3 id="5-blog-src-posts-post-2-md">5) blog/src/posts/post-2.md</h3>
+<pre><code class="lang-javascript">---
+title: Meu Segundo Post
+template: posts.hbt
+---
+
+Corpo do Post 2
+</code></pre>
+<h2 id="agora-criaremos-nossos-templates-em-handlebars-">Agora criaremos nossos templates em handlebars.</h2>
+<h3 id="6-blog-templates-index-hbt">6) blog/templates/index.hbt</h3>
+<pre><code class="lang-markup">&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+  &lt;meta charset=&quot;UTF-8&quot;&gt;
+  &lt;title&gt;Blog Index&lt;/title&gt;
+  &lt;link rel=&quot;stylesheet&quot; href=&quot;css/style.css&quot;&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;header&gt;
+    &lt;h1&gt;Index&lt;/h1&gt;
+  &lt;/header&gt;
+  &lt;section&gt;
+    {{{contents}}}
+  &lt;/section&gt;
+  &lt;section&gt;
+    &lt;h2&gt;Lista dos Posts&lt;/h2&gt;
+    &lt;ul&gt;
+      {{#each collections.posts }}
+        &lt;li&gt;
+          &lt;a href=&quot;{{this.path}}/index.html&quot; title=&quot;{{this.path}}&quot;&gt;{{this.title}}&lt;/a&gt;
+        &lt;/li&gt;
+      {{/each}}
+    &lt;/ul&gt;
+  &lt;/section&gt;
+  &lt;footer&gt;
+    made with &lt;a href=&quot;http://www.metalsmith.io/&quot;&gt;metalsmith&lt;/a&gt;
+  &lt;/footer&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<h3 id="7-blog-templates-posts-hbt">7) blog/templates/posts.hbt</h3>
+<pre><code class="lang-markup">&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+  &lt;meta charset=&quot;UTF-8&quot;&gt;
+  &lt;title&gt;Blog Posts&lt;/title&gt;
+  &lt;link rel=&quot;stylesheet&quot; href=&quot;../css/style.css&quot;&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;header&gt;
+    &lt;a href=&quot;../index.html&quot;&gt;Voltar para o Index&lt;/a&gt;
+  &lt;/header&gt;
+  &lt;article&gt;
+    &lt;h1&gt;{{this.title}}&lt;/h1&gt;
+    {{{contents}}}
+  &lt;/article&gt;
+  &lt;footer&gt;
+    made with &lt;a href=&quot;http://www.metalsmith.io/&quot;&gt;metalsmith&lt;/a&gt;
+  &lt;/footer&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<h2 id="vamos-dar-um-estilo-">Vamos dar um estilo.</h2>
+<h3 id="8-blog-src-css-style-css">8) blog/src/css/style.css</h3>
+<pre><code class="lang-css">* {
+  padding: 0;
+  margin: 0;
+}
+body {
+  margin: 30px auto;
+  max-width: 600px;
+  text-align: center;
+  font-size: 100%;
+  font-family: &#39;Georgia&#39;, &#39;Arial&#39;, serif;
+  color: #111;
+  background: #fff;
+}
+
+a {
+  color: #999;
+}
+
+header,
+section,
+article,
+footer {
+  margin-top: -1px;
+  padding: 20px;
+  border: solid 1px #eee;
+}
+
+ul li {
+  list-style: none;
+}
+
+ul li a {
+  display: inline-block;
+  margin: 5px;
+  color: #FF0050;
+}
+</code></pre>
+<h2 id="agora-s-criar-nosso-arquivo-principal-chamando-o-metalsmith-">Agora é só criar nosso arquivo principal chamando o Metalsmith.</h2>
+<h3 id="9-blog-index-js">9) blog/index.js</h3>
+<pre><code class="lang-javascript">var Metalsmith   = require(&#39;metalsmith&#39;);
+var collections  = require(&#39;metalsmith-collections&#39;);
+var markdown     = require(&#39;metalsmith-markdown&#39;);
+var templates    = require(&#39;metalsmith-templates&#39;);
+var permalinks   = require(&#39;metalsmith-permalinks&#39;);
+
+Metalsmith(__dirname)
+  .use(collections({             // nos dará acesso a um objeto chamado &#39;collections&#39; ...
+      posts: {                   // ... com todos os posts
+          pattern: &#39;posts/*.md&#39;, // aqui é o lugar onde estão nossos posts
+          sortBy: &#39;date&#39;,        // ordenar por data
+          reverse: true          // ordenar da data mais recente para a mais antiga
+      }
+  }))
+  .use(markdown())        // vai ler todos arquivos .md e transformar em um objeto
+  .use(permalinks({       // vai mudar o arquivo destino no padrão {title}/index.html
+      pattern: &#39;:title&#39;,
+      relative: false
+  }))
+  .use(templates(&#39;handlebars&#39;)) // nossos objetos serão passados para o handlebars
+  .destination(&#39;./build&#39;)       // diretório destino
+  .build(function(err, files) { // escreve os aquivos no diretório build
+    if (err) { throw err; }     // um handler de erro, sempre é bom
+  });
+</code></pre>
+<h3 id="9-finalmente-execute-o-comando-na-raiz-do-diret-rio-blog-">9) Finalmente execute o comando na raiz do diretório <code>blog</code>:</h3>
+<pre><code class="lang-javascript">$ node index.js
+</code></pre>
+<h3 id="10-v-at-o-diret-rio-build-e-abra-o-arquivo-index-html-no-seu-browser-favorito-e-est-pronto-">10) Vá até o diretório <code>build</code> e abra o arquivo <code>index.html</code> no seu browser favorito, e está pronto!</h3>
+<p>Em resumo, o Metalsmith vai ler a pasta <code>src</code> criar um nova pasta chamada <code>build</code> com o resultado de tudo feito pelos plugins.</p>
+<p>Eu não expliquei detalhe por detalhe, mas sei que você só fazendo esse exemplo vai sacar como as coisas funcionam.</p>
+<p>Aconselho a dar uma olhada no código de algum plugin, e veja como é fácil criar coisas no Metalsmith. Eu inclusive contribui para o plugin <a href="https://github.com/totocaster/metalsmith-tags">metalsmith-tags</a> e criei outro para colocar <code>gists</code> dentro do blog <a href="https://github.com/expalmer/metalsmith-gist">metalsmith-gist</a>.</p>
+<p>Logo irei fazer um novo post com a estrutura completa de um blog e criando plugins no Metalsmith.</p>
+<p>Espero que tenham gostado. That&#39;s it !</p>
+]]>
+        </content:encoded>
+      </item>
+    </channel>
+  </rss>
