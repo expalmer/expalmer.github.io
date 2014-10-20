@@ -10,11 +10,510 @@
         <title>Palmer Oliveira. Juntos Aprendemos Mais!</title>
         <link>http://expalmer.github.io</link>
       </image>
-      <pubDate>Thu, 02 Oct 2014 22:40:26 GMT</pubDate>
-      <lastBuildDate>Thu, 02 Oct 2014 22:40:26 GMT</lastBuildDate>
+      <pubDate>Mon, 20 Oct 2014 03:01:36 GMT</pubDate>
+      <lastBuildDate>Mon, 20 Oct 2014 03:01:36 GMT</lastBuildDate>
       <language>en-US</language>
       <generator>Metalsmith custom plugin</generator>
       <ttl>60</ttl>
+      <item>
+        <title><![CDATA[Criando um Blog Estático com Metalsmith contendo tags, gists, drafts e um rss feed]]></title>
+        <description><![CDATA[Dessa vez vamos criar novamente um blog estático, mas agora contendo tags, gists, drafts e rss feed]]></description>
+        <link>http://expalmer.github.io/criando-um-blog-estatico-com-metalsmith-contendo-tags-gists-drafts-e-um-rss-feed/</link>
+        <guid isPermaLink="true">http://expalmer.github.io/criando-um-blog-estatico-com-metalsmith-contendo-tags-gists-drafts-e-um-rss-feed/</guid>
+        <category><![CDATA[metalsmith]]></category>
+        <category><![CDATA[javascript]]></category>
+        <category><![CDATA[nodejs]]></category>
+        <dc:creator><![CDATA[Palmer Oliveira]]></dc:creator>
+        <pubDate>Mon, 20 Oct 2014 15:39:06 GMT</pubDate>
+        <content:encoded>
+          <![CDATA[<h2 id="vamos-complementar-nosso-blog-feito-em-metalsmith-http-metalsmith-io-com-as-features-tags-gist-drafts-e-um-rss-feed-">Vamos complementar nosso blog feito em <a href="http://metalsmith.io/">Metalsmith</a> com as features <code>tags</code>, <code>gist</code>, <code>drafts</code> e um <code>rss feed</code>.</h2>
+<p>Lembra dos plugins que mencionei no post passado? Pois é, o de <code>tags</code> <a href="https://github.com/totocaster/metalsmith-tags">metalsmith-tags</a> eu contribui, e o plugin de <code>gist</code> <a href="https://github.com/expalmer/metalsmith-gist">metalsmith-gist</a> eu criei, e esses que usaremos aqui :).</p>
+<p>O plugin <code>drafts</code> é para rascunhos, você cria seus posts, mas eles não serão gerados na pasta<code>build</code>.</p>
+<p>O <code>rss feed</code> fiz do meu jeito, mas recentemente criaram um plugin pra isso <a href="https://github.com/hurrymaplelad/metalsmith-feed">metalsmith-feed</a>. Depois dê uma olhada!</p>
+<p>Antes de postar os arquivos, queria te dar uma dica dessa <strong>lib</strong> muito legal chamada <a href="http://simbco.github.io/httpster/">httpster</a>.
+Use ela para levantar um server <code>nodejs</code> em qualquer diretório que quiser.</p>
+<p>Instale globalmente em sua máquina <code>npm -g install httpster</code>, depois entre na pasta desejada ( no nosso caso, entre na pasta <code>build</code> ) e dê o comando <code>httpster</code> então será levantado um servidor em <code>http://localhost:3333/</code>.
+É mágico! Estou usando direto para abrir meus projetos locais.</p>
+<h3 id="1-estrutura-de-arquivos-do-blog-">1 ) Estrutura de arquivos do Blog.</h3>
+<pre><code class="lang-javascript">- blog
+---- index.js
+---- package.json
+---- src
+-------- index.md
+-------- rss.xml
+-------- posts
+-------------- post-1.md
+-------------- post-2.md
+-------------- post-3.md
+-------------- post-4.md
+---- templates
+-------------- partials
+----------------------- footer.hbt
+----------------------- header.hbt
+-------------- index.hbt
+-------------- posts.hbt
+-------------- rss.hbt
+-------------- tags.hbt
+</code></pre>
+<h3 id="2-package-json">2) package.json</h3>
+<pre><code class="lang-javascript">{
+  &quot;name&quot;: &quot;blog&quot;,
+  &quot;description&quot;: &quot;meu blog legal&quot;,
+  &quot;version&quot;: &quot;0.0.1&quot;,
+  &quot;dependencies&quot;: {
+    &quot;handlebars&quot;: &quot;^2.0.0&quot;,
+    &quot;metalsmith&quot;: &quot;^0.11.0&quot;,
+    &quot;metalsmith-collections&quot;: &quot;^0.6.0&quot;,
+    &quot;metalsmith-drafts&quot;: &quot;0.0.1&quot;,
+    &quot;metalsmith-gist&quot;: &quot;^0.3.0&quot;,
+    &quot;metalsmith-markdown&quot;: &quot;^0.2.1&quot;,
+    &quot;metalsmith-permalinks&quot;: &quot;^0.4.0&quot;,
+    &quot;metalsmith-tags&quot;: &quot;^0.6.1&quot;,
+    &quot;metalsmith-templates&quot;: &quot;^0.5.2&quot;,
+    &quot;metasmith&quot;: &quot;0.0.1&quot;,
+    &quot;moment&quot;: &quot;^2.8.3&quot;
+  }
+}
+</code></pre>
+<p>Vamos comentar as dependências novamente.</p>
+<ul>
+<li><strong>metalsmith-drafts</strong>: Criar arquivos do tipo rascunho.</li>
+<li><strong>metalsmith-collections</strong>: Cria um objeto chamado <code>collections</code> com todos os posts.</li>
+<li><strong>metalsmith-markdown</strong>: Interpreta nossos arquivos <code>.md</code>.</li>
+<li><strong>metalsmith-permalinks</strong>: Muda o nome original do arquivo para uma url amigável.</li>
+<li><strong>metalsmith-gist</strong>: Pega gists do github e inclui na página.</li>
+<li><strong>metalsmith-tags</strong>: Cria páginas conforme as tags informadas.</li>
+<li><strong>metalsmith-templates</strong>: Permite usar um template engine.</li>
+<li><strong>handlebars</strong>: Nosso template engine.</li>
+<li><strong>moment</strong>: Para manipular datas.</li>
+</ul>
+<p>Instale as dependências. Dê o comando na raiz do diretório <code>blog</code>.</p>
+<pre><code class="lang-javascript">$ npm install
+</code></pre>
+<h2 id="vou-come-ar-pelo-arquivo-index-js-porque-precisamos-criar-alguns-handlebars-helpers-">Vou começar pelo arquivo <code>index.js</code>, porque precisamos criar alguns Handlebars helpers.</h2>
+<p>Precisaremos criar helpers para <strong>partials</strong> e <strong>formatação de datas</strong>. Note que criei esses 3 helpers que usaremos em nossos templates.
+Usarei também o plugin <a href="http://momentjs.com/">moment</a> para manipular datas.</p>
+<h3 id="3-index-js">3) index.js</h3>
+<pre><code class="lang-javascript">
+var Metalsmith   = require(&#39;metalsmith&#39;);
+var collections  = require(&#39;metalsmith-collections&#39;);
+var markdown     = require(&#39;metalsmith-markdown&#39;);
+var templates    = require(&#39;metalsmith-templates&#39;);
+var permalinks   = require(&#39;metalsmith-permalinks&#39;);
+var tags         = require(&#39;metalsmith-tags&#39;);
+var gist         = require(&#39;metalsmith-gist&#39;);
+var drafts       = require(&#39;metalsmith-drafts&#39;);
+
+var fs           = require(&#39;fs&#39;);
+var Handlebars   = require(&#39;handlebars&#39;);
+var moment       = require(&#39;moment&#39;);
+
+// Handlebars Helpers
+Handlebars.registerPartial({
+  &#39;header&#39;: fs.readFileSync(&#39;./templates/partials/header.hbt&#39;).toString(),
+  &#39;footer&#39;: fs.readFileSync(&#39;./templates/partials/footer.hbt&#39;).toString()
+});
+Handlebars.registerHelper(&#39;dateFormat&#39;, function( context ) {
+  return moment(context).format(&quot;LL&quot;);
+});
+Handlebars.registerHelper(&#39;dateGMT&#39;, function( context ) {
+  context = context === &#39;new&#39; ? new Date() : context;
+  return context.toGMTString();
+});
+
+Metalsmith(__dirname)
+  .use(drafts())                 // páginas com atributo &#39;draft: true&#39; não serão geradas.
+  .use(collections({             // nos dará acesso a um objeto chamado &#39;collections&#39; ...
+      posts: {                   // ... com todos os posts
+          pattern: &#39;posts/*.md&#39;, // aqui é o lugar onde estão nossos posts
+          sortBy: &#39;date&#39;,        // ordenar por data
+          reverse: true          // ordenar da data mais recente para a mais antiga
+      }
+  }))
+  .use(markdown())        // vai ler todos arquivos .md e transformar em um objeto
+  .use(permalinks({       // vai mudar o arquivo destino no padrão {title}/index.html
+      pattern: &#39;:title&#39;,
+      relative: false
+  }))
+  .use(gist()) // adiciona gists nas páginas desejadas.
+  .use(tags({  // criará páginas conforme as tags informadas
+    handle: &#39;tags&#39;,
+    template:&#39;tags.hbt&#39;,
+    path:&#39;tags&#39;,
+    sortBy: &#39;title&#39;,
+    reverse: true
+  }))
+  .use(templates(&#39;handlebars&#39;)) // nossos objetos serão passados para o handlebars
+  .destination(&#39;./build&#39;)       // diretório destino
+  .build(function(err, files) { // escreve os aquivos no diretório build
+    if (err) { throw err; }     // um handler de erro, sempre é bom
+  });
+</code></pre>
+<h2 id="p-ginas-do-blog">Páginas do Blog</h2>
+<h3 id="4-src-index-md">4) src/index.md</h3>
+<pre><code class="lang-javascript">---
+template: index.hbt
+---
+
+Bem vindo ao meu blog! Confira abaixo meus **posts**.
+</code></pre>
+<h3 id="5-src-posts-post-1-md">5) src/posts/post-1.md</h3>
+<p>Aqui temos campos novos como <code>date, description, author e tags</code>.</p>
+<pre><code class="lang-javascript">---
+title: Meu Primeiro Post com Metalsmith
+template: posts.hbt
+date: 2014-03-01
+description: Como criar um post com Metalsmith. Para o RSS Feed.
+author: Palmer. Para o RSS Feed.
+tags: metalsmith, nodejs, javascript
+---
+
+## Aprendendo a usar o [Metalsmith](http://metalsmith.io).
+
+### Porque usar Metalsmith ?
+
+- É fácil.
+- Divertido.
+- É em javascript.
+- Eu curti.
+</code></pre>
+<h3 id="6-src-posts-post-2-md">6) src/posts/post-2.md</h3>
+<p>Neste arquivo colocamos um bloco de código markdown.</p>
+<pre><code class="lang-javascript">---
+title: Meu Segundo Post sobre MEAN
+template: posts.hbt
+date: 2014-03-01
+description: Use MEAN facilmente. Para o RSS Feed.
+author: Palmer. Para o RSS Feed.
+tags: mongodb, express, angular, nodejs, javascript
+---
+
+## Aprenda a usar uma solução fullstack de javascript
+
+### Porque usar MEAN ?
+
+- Porque você usa um única linguagem.
+- Divertido.
+- É em javascript.
+- Eu curti.
+
+  ```javascript
+
+  // server.js
+
+  ...
+
+  app.configure(function() {
+
+    // set up our express application
+    app.use(express.logger(&#39;dev&#39;));
+    app.use(express.cookieParser());
+    app.use(express.bodyParser());
+
+    app.set(&#39;view engine&#39;, &#39;ejs&#39;);
+
+    // required for passport
+    app.use(express.session({ secret: &#39;mysecret&#39; }));
+    app.use(passport.initialize());
+    app.use(passport.session());
+    app.use(flash());
+
+  });
+
+  ...
+
+  ```\aqui são só 3 as aspas, então retire esse comentário
+</code></pre>
+<h3 id="7-src-posts-post-3-md">7) src/posts/post-3.md</h3>
+<p>Esse é nosso post do tipo <strong>rascunho</strong>, note o campo <code>draft: true</code>, ou seja, esse post não será gerado na pasta <code>build</code>.</p>
+<pre><code class="lang-javascript">  ---
+  title: Um Post que ainda não está pronto, portanto fica em draft
+  draft: true
+  template: posts.hbt
+  date: 2014-10-20
+  description: Post Não Pronto. Para o RSS Feed.
+  author: Palmer. Para o RSS Feed.
+  tags: nodejs
+  ---
+
+  ## Rest com NodeJS
+
+  ### Porque usar Node ?
+
+  Tenho que ver o que escrever ainda.
+</code></pre>
+<h3 id="8-src-posts-post-4-md">8) src/posts/post-4.md</h3>
+<p>Neste arquivo estamos usando o plugin <strong>metalsmith-gist</strong>, você informa o usuário e o nome da hash do gist <code>gist: expalmer/43952d905d75693dea0c</code>, e depois referencia ele no corpo do post.
+Nesse exemplo o gist original é esse <a href="https://gist.github.com/expalmer/43952d905d75693dea0c">https://gist.github.com/expalmer/43952d905d75693dea0c</a>.</p>
+<pre><code class="lang-javascript">  ---
+  title: Um Post de React com um Gist do Github
+  template: posts.hbt
+  date: 2014-10-19
+  description: Usando um Gist de React. Para o RSS Feed.
+  author: Palmer. Para o RSS Feed.
+  tags: react, javascript
+  gist: expalmer/43952d905d75693dea0c
+  ---
+
+  ## Começando com [React](http://facebook.github.io/react/).
+
+  ### Porque usar React ?
+
+  - É rápido.
+  - É organizado e modularizado.
+  - É em javascript.
+  - Eu curti.
+
+  Vamos começar então.
+
+  gist:expalmer/43952d905d75693dea0c
+</code></pre>
+<h3 id="9-src-rss-xml">9) src/rss.xml</h3>
+<p>Essa página irá somente conter os dados para o <code>rss</code>. Aqui eu coloquei <code>base:http://localhost:3333</code> mas depois você deve colocar um endereço certinho, no caso o do seu blog.</p>
+<pre><code class="lang-javascript">  ---
+  template: rss.hbt
+  untemplatized: 1
+  base: http://localhost:3333
+  name: Palmer Oliveira
+  title: Meu Blog
+  description: Um Blog Sobre Deselvolvimento Web
+  image: http://localhost:3333/myImage.jpg
+  ---
+</code></pre>
+<h2 id="vamos-agora-para-os-templates-">Vamos agora para os <strong>Templates</strong>.</h2>
+<h3 id="10-templates-index-hbt">10) templates/index.hbt</h3>
+<p>Aqui aplicamos nosso helper de <code>partials</code> com o header e o footer.</p>
+<pre><code class="lang-markup">  {{&gt; header}}
+    &lt;section&gt;
+      {{{contents}}}
+    &lt;/section&gt;
+    &lt;section&gt;
+      &lt;h1&gt;Lista dos Posts&lt;/h1&gt;
+      &lt;ul&gt;
+        {{#each collections.posts }}
+          &lt;li&gt;
+            &lt;a href=&quot;{{this.path}}/index.html&quot; title=&quot;{{this.title}}&quot;&gt;
+              &lt;h2&gt;{{this.title}}&lt;/h2&gt;
+              &lt;time datetime=&quot;{{ dateFormat this.date }}&quot;&gt;{{ dateFormat this.date }}&lt;/time&gt;
+            &lt;/a&gt;
+          &lt;/li&gt;
+        {{/each}}
+      &lt;/ul&gt;
+    &lt;/section&gt;
+  {{&gt; footer}}
+</code></pre>
+<h3 id="11-templates-partials-header-hbt">11) templates/partials/header.hbt</h3>
+<pre><code class="lang-markup">  &lt;!DOCTYPE html&gt;
+  &lt;html lang=&quot;en&quot;&gt;
+  &lt;head&gt;
+    &lt;meta charset=&quot;UTF-8&quot;&gt;
+    &lt;title&gt;Meu Blog&lt;/title&gt;
+    &lt;link rel=&quot;stylesheet&quot; href=&quot;/css/style.css&quot;&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;header&gt;
+      &lt;h1&gt;Meu Blog&lt;/h1&gt;
+      &lt;p&gt;Assine nosso &lt;a href=&quot;/rss.xml&quot;&gt;rss&lt;/a&gt;.&lt;/p&gt;
+    &lt;/header&gt;
+</code></pre>
+<h3 id="12-templates-partials-footer-hbt">12) templates/partials/footer.hbt</h3>
+<pre><code class="lang-markup">      &lt;footer&gt;
+        made with &lt;a href=&quot;http://www.metalsmith.io/&quot;&gt;metalsmith&lt;/a&gt;
+      &lt;/footer&gt;
+    &lt;/body&gt;
+  &lt;/html&gt;
+</code></pre>
+<h3 id="13-templates-posts-hbt">13) templates/posts.hbt</h3>
+<p>Aqui usaremos também nosso <code>partials</code> e a função para <code>formatação de datas</code>. Note também que temos acesso as <code>tags</code> informadas no corpo dos posts, então podemos dar um <strong>each</strong> neles.</p>
+<pre><code class="lang-markup">  {{&gt; header}}
+    &lt;section&gt;
+      &lt;a href=&quot;/&quot;&gt;Voltar para o Index&lt;/a&gt;
+    &lt;/section&gt;
+    &lt;article&gt;
+      &lt;h1&gt;{{this.title}}&lt;/h1&gt;
+      &lt;time datetime=&quot;{{ dateFormat this.date }}&quot;&gt;{{ dateFormat this.date }}&lt;/time&gt;
+      &lt;ul class=&quot;post__tags&quot;&gt;
+        {{#each this.tags }}
+          &lt;li&gt;
+            &lt;a href=&quot;/tags/{{this}}.html&quot; title=&quot;Posts sobre {{this}}&quot;&gt;{{this}}&lt;/a&gt;
+          &lt;/li&gt;
+        {{/each}}
+      &lt;/ul&gt;
+      &lt;div class=&quot;post__body&quot;&gt;
+        {{{contents}}}
+      &lt;/div&gt;
+    &lt;/article&gt;
+  {{&gt; footer}}
+</code></pre>
+<h3 id="14-templates-tags-hbt">14) templates/tags.hbt</h3>
+<p>Aqui é o template usado pelo plugin de <code>tags</code>.</p>
+<pre><code class="lang-markup">  {{&gt; header}}
+    &lt;section&gt;
+      &lt;a href=&quot;/&quot;&gt;Voltar para o Index&lt;/a&gt;
+    &lt;/section&gt;
+    &lt;section&gt;
+      &lt;h1&gt;Tag: &lt;strong&gt;{{tag}}&lt;/strong&gt;&lt;/h1&gt;
+      &lt;ul&gt;
+      {{#each posts }}
+        &lt;li&gt;
+            &lt;a href=&quot;/{{this.path}}/index.html&quot; title=&quot;{{this.title}}&quot;&gt;
+              &lt;h2&gt;{{this.title}}&lt;/h2&gt;
+              &lt;time datetime=&quot;{{ dateFormat this.date }}&quot;&gt;{{ dateFormat this.date }}&lt;/time&gt;
+            &lt;/a&gt;
+          &lt;/li&gt;
+      {{/each}}
+      &lt;/ul&gt;
+    &lt;/section&gt;
+  {{&gt; footer}}
+</code></pre>
+<h3 id="15-templates-rss-hbt">15) templates/rss.hbt</h3>
+<p>Aqui é o template usado pela página <code>src/rss.xml</code> para criar nosso <strong>rss feed</strong>.</p>
+<pre><code class="lang-markup">  &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;
+  &lt;rss xmlns:dc=&quot;http://purl.org/dc/elements/1.1/&quot; xmlns:content=&quot;http://purl.org/rss/1.0/modules/content/&quot; xmlns:atom=&quot;http://www.w3.org/2005/Atom&quot; version=&quot;2.0&quot; xmlns:geo=&quot;http://www.w3.org/2003/01/geo/wgs84_pos#&quot;&gt;
+    &lt;channel&gt;
+      &lt;title&gt;&lt;![CDATA[{{this.title}}]]&gt;&lt;/title&gt;
+      &lt;atom:link href=&quot;{{this.base}}/rss.xml&quot; rel=&quot;self&quot; type=&quot;application/rss+xml&quot;/&gt;
+      &lt;link&gt;{{this.base}}&lt;/link&gt;
+      &lt;description&gt;&lt;![CDATA[{{this.description}}]]&gt;&lt;/description&gt;
+      &lt;image&gt;
+        &lt;url&gt;{{this.image}}&lt;/url&gt;
+        &lt;title&gt;{{this.title}}&lt;/title&gt;
+        &lt;link&gt;{{this.base}}&lt;/link&gt;
+      &lt;/image&gt;
+      &lt;pubDate&gt;{{dateGMT &#39;new&#39;}}&lt;/pubDate&gt;
+      &lt;lastBuildDate&gt;{{dateGMT &#39;new&#39;}}&lt;/lastBuildDate&gt;
+      &lt;language&gt;en-US&lt;/language&gt;
+      &lt;generator&gt;Metalsmith custom plugin&lt;/generator&gt;
+      &lt;ttl&gt;60&lt;/ttl&gt;
+      {{#each collections.posts }}
+      &lt;item&gt;
+        &lt;title&gt;&lt;![CDATA[{{this.title}}]]&gt;&lt;/title&gt;
+        &lt;description&gt;&lt;![CDATA[{{this.description}}]]&gt;&lt;/description&gt;
+        &lt;link&gt;{{../this.base}}/{{this.path}}/&lt;/link&gt;
+        &lt;guid isPermaLink=&quot;true&quot;&gt;{{../this.base}}/{{this.path}}/&lt;/guid&gt;
+        {{#each this.tags }}
+        &lt;category&gt;&lt;![CDATA[{{this}}]]&gt;&lt;/category&gt;
+        {{/each}}
+        &lt;dc:creator&gt;&lt;![CDATA[{{this.author}}]]&gt;&lt;/dc:creator&gt;
+        &lt;pubDate&gt;{{dateGMT this.date}}&lt;/pubDate&gt;
+        &lt;content:encoded&gt;
+          &lt;![CDATA[{{{contents}}}]]&gt;
+        &lt;/content:encoded&gt;
+      &lt;/item&gt;
+      {{/each}}
+    &lt;/channel&gt;
+  &lt;/rss&gt;
+</code></pre>
+<h3 id="16-src-css-style-css">16) src/css/style.css</h3>
+<p>Vamos colocar um estilo.</p>
+<pre><code class="lang-css">* {
+  padding: 0;
+  margin: 0;
+}
+body {
+  margin: 30px auto;
+  max-width: 600px;
+  text-align: center;
+  font-size: 100%;
+  font-family: &#39;Georgia&#39;, &#39;Arial&#39;, serif;
+  color: #111;
+  background: #fff;
+}
+
+a {
+  color: #999;
+}
+a:hover {
+  color: #FF0050;
+}
+
+header,
+section,
+article,
+footer {
+  margin-top: -1px;
+  padding: 20px;
+  border: solid 1px #eee;
+}
+
+ul li {
+  list-style: none;
+  margin: 20px 0;
+}
+
+ul li a {
+  display: inline-block;
+  margin: 5px;
+  color: #FF0050;
+}
+
+ul li a:hover { color: #FF578B; }
+
+section h1 {
+  font-size: 2em;
+}
+
+time {
+  display: inline-block;
+  padding: 2px 4px;
+}
+
+.post__tags li {
+  display: inline-block;
+}
+.post__tags li a {
+  display: inline-block;
+  margin: 5px 0;
+  padding: 3px 6px;
+  color: #fff;
+  background: #222;
+  text-decoration: none;
+  border-radius: 5px;
+  border: solid 1px #000;
+}
+.post__tags li a:hover {
+  color: #fff;
+  background: #FF0050;
+}
+
+.post__body {
+  margin: 20px 0;
+  padding: 20px 0;
+  text-align: left;
+  border-top: solid 1px #eee;
+}
+.post__body h2, .post__body h3 {
+  margin: 10px 0;
+}
+.post__body ul {
+  padding-left: 40px;
+}
+.post__body ul li {
+  list-style: square;
+}
+.post__body p {
+  margin: 1rem 0;
+  font-size: 1em;
+  line-height: 1.7;
+}
+pre {
+  padding: 20px;
+  background: #313430;
+  color: #64FA0F;
+  border-radius: 4px;
+}
+</code></pre>
+<h3 id="17-finalmente-execute-o-comando-na-raiz-do-diret-rio-blog-">17) Finalmente execute o comando na raiz do diretório <code>blog</code>:</h3>
+<pre><code class="lang-javascript">$ node index.js
+</code></pre>
+<p>Lembra da dica? Vá até a pasta <code>build</code> e dê o comando <code>httpster</code>, então abra o browser em <code>http://localhost:3333/</code>. Confere lá como ficou.</p>
+<p>O post ficou meio longo eu sei, mas usando essa base, você pode criar seu blog com várias features bacanas.</p>
+<p>Neste blog eu uso mais alguns plugins como <code>metalsmith-concat</code>, <code>metalsmith-clean-css</code>, <code>metalsmith-uglify</code>, <code>metalsmith-html-minifier</code>, claro que você pode usar um <code>grunt</code> ou <code>gulp</code> da vida pra isso.</p>
+<p>Se tiver alguma dúvida, ficarei feliz em ajuda-lo!</p>
+<p>Espero que tenham gostado. That&#39;s it !</p>
+]]>
+        </content:encoded>
+      </item>
       <item>
         <title><![CDATA[Metalsmith, um extremamente simples gerador de páginas estáticas feito em javascript]]></title>
         <description><![CDATA[Tomei coragem e resolvi criar meu blog, e escolhi o Metalsmith por ser em javascript, minha linguagem favorita.]]></description>
