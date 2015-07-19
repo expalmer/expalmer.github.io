@@ -10,8 +10,8 @@
         <title>Palmer Oliveira. Juntos Aprendemos Mais!</title>
         <link>http://expalmer.github.io</link>
       </image>
-      <pubDate>Mon, 02 Mar 2015 20:11:39 GMT</pubDate>
-      <lastBuildDate>Mon, 02 Mar 2015 20:11:39 GMT</lastBuildDate>
+      <pubDate>Sun, 19 Jul 2015 17:20:18 GMT</pubDate>
+      <lastBuildDate>Sun, 19 Jul 2015 17:20:18 GMT</lastBuildDate>
       <language>en-US</language>
       <generator>Metalsmith custom plugin</generator>
       <ttl>60</ttl>
@@ -1116,10 +1116,12 @@ select.form-control {
   };
 
   app.init = function () {
-    this.$form = document.querySelectorAll(&#39;.js-delete-form&#39;);
-    for (var prop in this.$form) {
-      if ( this.$form.hasOwnProperty(prop) ) {
-        this.$form[prop].onsubmit = this.onSubmit;
+    var form = document.querySelectorAll(&#39;.js-delete-form&#39;);
+    for (var prop in form) {
+      if ( form.hasOwnProperty(prop) ) {
+        if ( &quot;onsubmit&quot; in form[prop] ) {
+          form[prop].onsubmit = this.onSubmit;
+        }
       }
     }
   };
@@ -1138,6 +1140,7 @@ select.form-control {
 <p>Pronto!!!</p>
 <p>Agora abra seu browser no endereço do seu APP, no meu caso é <code>http://localhost/slim-rest/</code>.</p>
 <p>Extenso né ? Sei disso, mas espero que sirva de ajuda ou auxílio para você.</p>
+<p>Mais uma coisa, <a href="http://192.241.214.149/slim-rest/">clique aqui e veja o app funcionando</a>.</p>
 <p>Obrigado por ler, e até o próximo post.</p>
 <p>That&#39;s it!</p>
 ]]>
