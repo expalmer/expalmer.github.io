@@ -10,14 +10,29 @@
         <title>Palmer Oliveira. Juntos Aprendemos Mais!</title>
         <link>http://expalmer.github.io</link>
       </image>
-      <pubDate>Mon, 21 Dec 2015 20:01:08 GMT</pubDate>
-      <lastBuildDate>Mon, 21 Dec 2015 20:01:08 GMT</lastBuildDate>
+      <pubDate>Wed, 30 Dec 2015 18:49:16 GMT</pubDate>
+      <lastBuildDate>Wed, 30 Dec 2015 18:49:16 GMT</lastBuildDate>
       <language>pt-BR</language>
       <generator>Metalsmith custom plugin</generator>
       <ttl>60</ttl>
       
       <item>
-        <title><![CDATA[Criando seu proprio Array Reduce em Javascript]]></title>
+        <title><![CDATA[Criando seu próprio Array MergeAll e Zip em Javascript]]></title>
+        <description><![CDATA[Aprendendo programação funcional criando funções auxiliares mergeAll e zip em javascript.]]></description>
+        <link>http://expalmer.github.io/criando-seu-proprio-array-mergeall-e-zip-em-javascript/</link>
+        <guid isPermaLink="true">http://expalmer.github.io/criando-seu-proprio-array-mergeall-e-zip-em-javascript/</guid>
+        
+        <category><![CDATA[javascript]]></category>
+        
+        <dc:creator><![CDATA[Palmer Oliveira]]></dc:creator>
+        <pubDate>Mon, 28 Dec 2015 19:00:06 GMT</pubDate>
+        <content:encoded>
+          <![CDATA[]]>
+        </content:encoded>
+      </item>
+      
+      <item>
+        <title><![CDATA[Criando seu próprio Array Reduce em Javascript]]></title>
         <description><![CDATA[Aprendendo programação funcional criando um reduce em javascript.]]></description>
         <link>http://expalmer.github.io/criando-seu-proprio-array-reduce-em-javascript/</link>
         <guid isPermaLink="true">http://expalmer.github.io/criando-seu-proprio-array-reduce-em-javascript/</guid>
