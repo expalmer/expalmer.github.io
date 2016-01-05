@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+    
+    <title>Criando seu proprio Client Router em Javascript - Parte 1 | Palmer Oliveira. Juntos Aprendemos Mais!</title>
+    
+
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="white" />
+
+    <link rel="alternate" type="application/rss+xml" title="RSS 2.0" href="/rss.xml">
+
+    <meta name="HandheldFriendly" content="True" />
+    <meta name="MobileOptimized" content="320" />
+
+    <meta name="author" content="@expalmer">
+    <meta name="description" content="Sempre quis saber como funciona um router em Javascript, então resolvi criar um.">
+    <link rel="canonical" href="http://expalmer.github.io/criando-seu-proprio-client-router-em-javascript-parte-1">
+
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@expalmer">
+    <meta name="twitter:domain" content="http://expalmer.github.io">
+    <meta name="twitter:image:src" content="http://expalmer.github.io/images/palmer.jpg">
+    <meta name="twitter:creator" content="@expalmer">
+    <meta name="twitter:title" content="Criando seu proprio Client Router em Javascript - Parte 1">
+    <meta name="twitter:description" content="Sempre quis saber como funciona um router em Javascript, então resolvi criar um.">
+
+    <meta itemprop="name" content="Criando seu proprio Client Router em Javascript - Parte 1">
+    <meta itemprop="description" content="Sempre quis saber como funciona um router em Javascript, então resolvi criar um.">
+    <meta itemprop="image" content="http://expalmer.github.io/images/palmer.jpg">
+    <meta itemprop="url" content="http://expalmer.github.io/criando-seu-proprio-client-router-em-javascript-parte-1">
+    <meta itemprop="author" content="@expalmer">
+    <meta itemprop="inLanguage" content="pt-BR">
+    <meta itemprop="keywords" content="javascript">
+
+    <meta property="og:locale" content="pt_BR">
+    <meta property="og:type" content="article">
+    <meta property="og:image" content="http://expalmer.github.io/images/palmer.jpg">
+    <meta property="og:title" content="Criando seu proprio Client Router em Javascript - Parte 1">
+    <meta property="og:description" content="Sempre quis saber como funciona um router em Javascript, então resolvi criar um.">
+    <meta property="og:url" content="http://expalmer.github.io/criando-seu-proprio-client-router-em-javascript-parte-1">
+    <meta property="og:site_name" content="Criando seu proprio Client Router em Javascript - Parte 1">
+
+    <meta name="google-site-verification" content="BkRIiZn31VGZWd4NBpMhpA8pxdgnSOVwB0jaCFP800M" />
+
+    <link rel="stylesheet" href="/styles/main.min.css">
+
+    <link href="/favico.ico" rel="icon">
+
+  </head>
+  <body>
+    <header class="header">
+      <a href="http://expalmer.github.io" class="header__home" title="Blog do expalmer">
+        <figure>
+          <img src="http://expalmer.github.io/images/palmer.jpg" alt="Foto de um Panda de Óculos">
+        </figure>
+        <p>@expalmer</p>
+      </a>
+      <h1>A Javascript Enthusiast</h1>
+      <h2>Juntos Aprendemos Mais :)</h2>
+      <nav class="header__menu">
+        <ul class="menu">
+          <li><a href="http://expalmer.github.io" class="menu__link" title="Posts do Blog">Posts</a></li>
+          <li><a href="http://expalmer.github.io/tags/" class="menu__link" title="Tags do Blog">Tags</a></li>
+          <li><a href="https://github.com/expalmer" class="menu__link" title="Github do @expalmer">GitHub</a></li>
+          <li><a href="http://expalmer.github.io/rss.xml" class="menu__link" title="RSS do Blog">RSS</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    
+  <main class="main">
+    <div class="limiter">
+      <article class="article" itemscope itemtype="https://schema.org/Blog">
+        <header>
+          <time class="post__time" itemprop="datePublished" content="January 4, 2016" datetime="January 4, 2016">January 4, 2016</time>
+          <h1 class="post__title">Criando seu próprio Client Router em Javascript - Parte 1</h1>
+          <iside class="post__related">
+            
+            <a href="http://expalmer.github.io/tags/javascript" class="atag javascript" title="Veja mais posts sobre javascript">javascript</a>
+            
+          </iside>
+        </header>
+        <p>Lí todo código do <strong>router</strong> <a href="pagejs">pagejs</a>, e o que vamos fazer é praticamente reescrevê-lo passo a passo, e acredito que você vai aprender alguns truques assim como eu aprendi.</p>
+<p>Dividi o post em 2 partes, esse primeiro criando um router básico, e na sequencia um mais completo.</p>
+<p>Acredito que para quem é iniciante em Javascript o código seja um pouco hard, mas vou tentar explicar com o máximo de detalhes possíveis, e se der tudo certo, você terá escrito seu próprio router para usar em seus projetos.</p>
+<h2 id="funcionamento-do-router">Funcionamento do router</h2>
+<p>O router deve criar <strong>rotas</strong>, ou seja, informar um <strong>path</strong> e executar um <strong>callback</strong> quando esse <strong>path</strong> for chamado.</p>
+<p>Nosso router será uma função chamada <code>micror</code> (<strong>micro r</strong>outer...entendeu?) e seus métodos serão:</p>
+<ul>
+<li><code>micror( path, callback )</code> Cria uma rota</li>
+<li><code>micror.go( path )</code> Chama uma rota</li>
+<li><code>micror.run( options )</code> Inicia o router</li>
+</ul>
+<h4 id="criando-uma-rota">Criando uma rota</h4>
+<p>Aqui passamos o <strong>path</strong> e o <strong>callback</strong>.</p>
+<pre><code class="lang-javascript">micror(&#39;/&#39;, function(context) {
+    console.log(&#39;Home&#39;); 
+});
+</code></pre>
+<h4 id="chamando-uma-rota">Chamando uma rota</h4>
+<p>Aqui estamos chamando o <strong>path</strong> <code>/</code> que executará a rota que criamos acima.</p>
+<pre><code class="lang-javascript">micror.go(&#39;/&#39;);
+</code></pre>
+<h4 id="iniciando-o-router">Iniciando o router</h4>
+<p>Iniciar é opcional, mas iremos chamar essa função para pegar a <code>url atual</code>e internamente executar o <code>micror.go(&#39;url_atual&#39;)</code>.</p>
+<p>Nessa função podemos passar um objeto com 2 opções, que também são opcionais:</p>
+<ul>
+<li>Opção para <strong>base</strong> url: <code>{ base: &#39;/adm&#39; }</code>.</li>
+<li>Opção para <strong>hash</strong> /!#: <code>{ hash: true }</code>.</li>
+</ul>
+<pre><code class="lang-javascript">micror.run(); // micror.run( { base: &#39;/adm&#39;, hash: &#39;true&#39;} );
+</code></pre>
+<h4 id="criando-uma-rota-com-par-metros">Criando uma rota com parâmetros</h4>
+<p>Nós precisamos passar parâmetros em algumas rotas, por exemplo um <code>id</code> de um post <code>&#39;/post/:id&#39;</code>, então note esses dois pontos <code>:</code>, isso significa que na rota <strong>post</strong>, vai ter um parâmetro chamado <code>id</code> e o mesmo é obrigatório.</p>
+<p>Mas existem situações que você precisa de um parâmetro, mas o mesmo é opcional, como por exemplo em <strong>posts</strong> <code>&#39;/posts/:page/:order?&#39;</code>, note que nessa rota temos o <code>:page</code> que é um parâmetro obrigatório, mas temos agora esse <code>:order?</code> onde temos um <code>?</code> no final, isso significa que o parâmetro é opcional. </p>
+<p>Tudo isso vai no objeto <code>context</code> que explico a seguir.</p>
+<pre><code class="lang-javascript">micror(&#39;/post/:id&#39;, function(context) {
+    console.log(context.params.id);
+});
+
+micror(&#39;/posts/:page/:order?&#39;, function(ctx) {
+    console.log(context.params.page);
+    console.log(context.params.order);
+});
+</code></pre>
+<h4 id="criando-uma-rota-universal">Criando uma rota universal</h4>
+<p>Podemos também criar um rota universal usando <code>*</code> que será chamada com qualquer <strong>path</strong> que colocarmos. Mas tem que se ligar na ordem onde a declaramos, pois se colocarmos na frente de todas as outras rotas, somente ela executará e não cairá nas demais. Por isso colocamos ela sempre no final para usar como um <code>not found</code>, ou seja, se não der <code>match</code> em nenhuma rota, cai nela ;)</p>
+<pre><code class="lang-javascript">micror(&#39;/&#39;, function(ctx) {
+    console.log(&#39;Home&#39;);
+});
+
+micror(&#39;/about&#39;, function(ctx) {
+    console.log(&#39;Home&#39;);
+});
+
+micror(&#39;*&#39;, function(ctx) {
+    console.log(&#39;Rota Universal - Not Found&#39;);
+});
+</code></pre>
+<h4 id="explicando-o-objeto-context">Explicando o objeto Context</h4>
+<p>Todo <strong>callback</strong> recebe uma instância do objeto <code>Context</code>, nele colocamos informações da <strong>url</strong> como <code>querystring</code> e <code>hash</code> (quando houver). Mas nela também pegamos os parâmetros (obrigatório e/ou opcional) informados na rota, e então colocamos no atributo <code>params</code>.</p>
+<p>Se chamamos algo assim <strong>micror.go(&#39;/posts/10?year=2016#results&#39;)</strong>, note que temos várias informações aqui, temos um parâmetro que vamos chamar de <strong>page</strong> <code>10</code>, temos o <strong>querystring</strong> <code>year=2016</code>e o <strong>hash</strong> <code>#results</code>. Confira como fica o <strong>context</strong> aqui.</p>
+<pre><code class="lang-javascript">micror(&#39;/posts/:page&#39;, function(context) {
+    console.log(&#39;page&#39;, context.params.page);
+    console.log(&#39;queryString&#39;, context.querystring);
+    console.log(&#39;hash&#39;, context.hash);
+});
+</code></pre>
+<h4 id="alterando-a-url">Alterando a Url</h4>
+<p>Cada vez que chamamos uma rota devemos alterar a <code>url</code>, e faremos isso com <a href="https://developer.mozilla.org/en-US/docs/Web/API/History_API#The_replaceState()_method">history.replaceState</a>.</p>
+<p>Bom acho que é isso, vamos criar nosso <strong>router</strong>. De repente algumas coisas não ficaram claras ainda, mas conforme criamos o código, as coisas vão clareando.</p>
+<h2 id="1-micror-js">1) micror.js</h2>
+<p>Crie um arquivo chamado <code>micror.js</code>, todo código vai nele.</p>
+<pre><code class="lang-javascript">
+var _base = &#39;&#39;; // base url
+var _hash = false; // controle por hash
+
+// nosso router :)
+function micror(path, callback){
+    // criamos um objeto &quot;route&quot;
+    var route = {
+      path: path,
+      keys: []
+    };
+    // regexp
+    route.regexp = regexp(path,route.keys);
+    // armazenando as rotas
+    micror.callbacks.push(middleware(route, callback));
+}
+
+// objeto que guarda as rotas
+micror.callbacks = [];
+</code></pre>
+<p>Cada vez que criamos uma rota, criamos um objeto chamado <code>route</code> que possui como atributos (<code>path</code>, <code>keys</code>, <code>regexp</code>).</p>
+<p>O atributo <code>route.regexp</code> chama a função <code>regexp</code> passando o <strong>path</strong> e suas <strong>keys</strong> que é um array vazio. A função retorna uma <strong>expressão regular</strong> que será usada para comparar a rota, e junto já extrai os parâmetros para colocar dentro de <code>keys</code>. Por exemplo, se damos o path <code>/posts/:page/:order?</code>, é retornado <code>/^\/posts\/([^\/]+)(?:\/([^\/]+))?(?:\/(?=$))?$/i</code>, e as <code>keys</code> ficarão assim <code>[ { name: 0 }, { name: &#39;page&#39; }, { name: &#39;order&#39; } ]</code>.  </p>
+<p>A expressão regular acima diz que para fazer o <strong>match</strong>, precisa começar com <strong>/posts</strong> seguido de <strong>qualquer coisa que não seja uma barra e contenha mais de um caracter</strong>, seguido de <strong>opcionalmente qualquer coisa que não seja uma barra e contenha mais de um caracter</strong> e <strong>opcionalemente termine com uma barra</strong>. Ufa... </p>
+<p>Note que as <strong>keys</strong> já estão na ordem certinha dos parâmetros que informados na rota. Os parâmetros obrigatório e/ou opcionais que usamos <code>:</code> e <code>?</code>, são colocados os seus nomes (<code>{ name: &#39;page&#39; }</code>), nos parâmetros normais é colocado zero (<code>{ name: 0 }</code>).</p>
+<p>Mas para que isso tudo? Bom quando chamamos uma rota por exemplo <code>micror.go(&#39;/posts/10/asc&#39;)</code>, já que temos nossas <code>keys</code> na ordem certa, consiguimos juntar essas informações para colocar no <code>context</code>, saca só:</p>
+<pre><code class="lang-javascript">// Esse é o path da rota que criamos
+/posts/:page/:order?
+
+// as keys criadas pela função regexp
+[ { name: 0 }, { name: &#39;page&#39; }, { name: &#39;order&#39; } ]
+
+// o path chamado foi esse
+/posts/123/asc
+
+// e finalmente temos isso no context
+context.params.page = 123
+context.params.order = &#39;asc&#39;
+</code></pre>
+<p>Esse é o truque.</p>
+<h2 id="2-regexp-">2) regexp()</h2>
+<p>Essa é a função que faz tudo que falamos acima, dá uma conferida.</p>
+<pre><code class="lang-javascript">function regexp(path, keys) {
+    var regex = path.replace(/\/(:?)([^\/?]+)(\??)(?=\/|$)/g,
+    function(match, isVariable, segment, isOptional) {
+        if(isVariable) keys.push({ name: segment });
+        return isVariable ? isOptional ? &#39;(?:\\/([^\\/]+))?&#39; : &#39;\\/([^\\/]+)&#39; : &#39;\\/&#39; + segment;
+    });
+    regex = regex === &#39;*&#39; ? &#39;(.*)&#39; : (regex === &#39;/&#39; ? &#39;&#39; : regex);
+    if (keys.length === 0) keys.push({name: 0});
+    return new RegExp( &#39;^&#39; + regex + &#39;(?:\\/(?=$))?$&#39;,&#39;i&#39;);
+}
+</code></pre>
+<h2 id="3-middleware-">3) middleware()</h2>
+<p>Lá em cima fizemos isso <code>micror.callbacks.push(middleware(route, callback));</code>, aqui chamamos a função <code>middleware</code> passando o  objeto <code>route</code> e o <code>callback</code>. A função <strong>middleware</strong> retorna uma outra função que espera um objeto <code>context</code> e uma função <code>next</code>.</p>
+<p>Quando essa função for chamada, ela vai pegar o<code>context</code> passado e comparar com o objeto <code>route</code> que o originou, comparando o  <strong>route.regexp</strong> com o <strong>context.path</strong>. Se der <strong>match</strong> nós preenchemos o atributo <code>params</code> do <strong>context</strong> com as <code>keys</code> do <strong>route</strong> conforme falamos acima, e finalmente chamamos o <code>callback</code> passando o <strong>context</strong>.</p>
+<p>Caso não dê <strong>match</strong>, é chamado a função <code>next</code> que irá verificar outra rota até dar <strong>match</strong> ou acabar as rotas registradas. </p>
+<pre><code class="lang-javascript">function middleware(route, callback) {
+    return function( context, next ) {
+        var match = route.regexp.exec(decodeURIComponent(context.path));
+        if( match ) {
+            fillParams(match, route.keys, context.params );
+            return callback(context);
+        }
+        next();
+    }
+}
+</code></pre>
+<h2 id="4-fillparams">4) fillParams</h2>
+<p>Essa função faz aquilo que falamos lá em cima, de juntar as <code>keys</code> e os parâmetros que foram informados na <code>url</code>.</p>
+<pre><code class="lang-javascript">function fillParams(match, keys, params) {
+    var len = match.length;
+    var idx = 0;
+    var key, val;
+    while (++idx &lt; len) {
+        key = keys[idx - 1];
+        val = match[idx];
+        if (val !== undefined) {
+            params[key.name] = val;
+        }
+    }
+}
+</code></pre>
+<h2 id="5-micror-go-">5) micror.go()</h2>
+<p>Aqui é que verificamos cada um dos <code>callbacks</code> das rotas que foram registrados.</p>
+<p>Quando chamamos uma rota, primeiramente é criado uma instância do objeto <code>Context</code>, esse objeto pega o <code>path</code> passado e extrai várias informações importantes como:</p>
+<ul>
+<li><code>fullPath</code>: O <strong>path</strong> original com querystring e hash.</li>
+<li><code>path</code>: Aqui é retirado a querystring e hash para poder fazer o <strong>match</strong> com o <strong>route.regexp</strong></li>
+<li><code>querystring</code></li>
+<li><code>hash</code></li>
+<li><code>title</code>: Título da página</li>
+</ul>
+<p>O <strong>Context</strong> possui também um método para fazer o <code>replaceState</code>, e já fazemos isso após criá-lo.</p>
+<p>Agora chamo a função <code>callNextCallback</code> que começa com o índice zero, e verifica se possui uma função registrada em <code>micror.callbacks</code>, se sim, ele executa a função que é aquela função <strong>middleware</strong> passando o <code>context</code> e ela própria <strong>callNextCallback</strong>. Lembra que lá em cima a função <code>next</code> em <strong>middleware</strong>? Se não der <strong>match</strong> ele chama o <strong>next</strong> que é na real nossa <code>callNextCallback</code> somando +1 no nosso índice, e segue adiante até acabar as funções das rotas registrados...não é genial ?</p>
+<pre><code class="lang-javascript">micror.go = function(path) {
+    var context = new Context(path);
+    context.saveState();
+    var i = 0;
+    function callNextCallback() {
+        var callback = micror.callbacks[i++];
+          if(!callback) {
+               return console.log(&#39;route [&#39;, context.path, &#39;] not found&#39;);
+          }
+          callback( context, callNextCallback );
+    }
+    callNextCallback();
+};
+</code></pre>
+<h2 id="6-micror-run-">6) micror.run()</h2>
+<p>Aqui é simples, inicializamos nossas <strong>options</strong>, depois pegamos a <code>url</code> atual e já chamamos uma rota.</p>
+<pre><code class="lang-javascript">micror.run = function(opts) {
+    _base = opts &amp;&amp; opts.base ? opts.base : &#39;&#39;;
+    _hash = opts &amp;&amp; opts.hash ? &#39;#!&#39; : false;
+    var url = location.pathname + location.search + location.hash;
+    url = _base ? url.replace(_base, &#39;&#39;) : &#39;&#39;;
+    if( _hash &amp;&amp; ~location.hash.indexOf(&#39;#!&#39;) ) {
+      url = location.hash.substr(2) + location.search;
+    }
+    micror.go(url);
+};
+</code></pre>
+<h2 id="7-context-">7) Context()</h2>
+<pre><code class="lang-javascript">function Context(path) {
+    path = _base + (_hash ? &#39;/#!&#39; : &#39;&#39;) + path.replace(_base,&#39;&#39;);
+    path = path.length &gt; 1 ? path.replace(/\/$/,&#39;&#39;) : path;
+    this.fullPath = path;
+    path = _hash ? path.split(&#39;#!&#39;)[1] : (_base ? path.replace(_base,&#39;&#39;) : path);
+    this.title = document.title;
+    this.params = {};
+    var h = path.split(&#39;#&#39;);
+    path = h[0];
+    this.hash = h[1] || &#39;&#39;;
+    var q = path.split(&#39;?&#39;);
+    path = q[0];
+    this.querystring = q[1] || &#39;&#39;;
+    this.path = path || &#39;/&#39;;
+}
+
+Context.prototype.saveState = function() {
+    history.replaceState(this.state, this.title, this.fullPath );
+};
+</code></pre>
+<h2 id="c-digo-completo">Código completo</h2>
+<p>Segue o código completo agora.</p>
+<pre><code class="lang-javascript">var _base = &#39;&#39;;
+var _hash = false;
+
+function micror(path, callback){
+    var route = {
+      path: path,
+      keys: []
+    };
+    route.regexp = regexp(path,route.keys);
+    micror.callbacks.push(middleware(route, callback));
+}
+
+micror.callbacks = [];
+
+micror.go = function(path) {
+    var context = new Context(path);
+    context.saveState();
+    var i = 0;
+    function callNextCallback() {
+        var callback = micror.callbacks[i++];
+        if(!callback) {
+            return console.log(&#39;route [&#39;, context.path, &#39;] not found&#39;);
+        }
+        callback( context, callNextCallback );
+    }
+    callNextCallback();
+};
+
+micror.run = function(opts) {
+    _base = opts &amp;&amp; opts.base ? opts.base : &#39;&#39;;
+    _hash = opts &amp;&amp; opts.hash ? &#39;#!&#39; : false;
+    var url = location.pathname + location.search + location.hash;
+    url = _base ? url.replace(_base, &#39;&#39;) : &#39;&#39;;
+    if( _hash &amp;&amp; ~location.hash.indexOf(&#39;#!&#39;) ) {
+      url = location.hash.substr(2) + location.search;
+    }
+    micror.go(url);
+};
+
+function Context(path) {
+    path = _base + (_hash ? &#39;/#!&#39; : &#39;&#39;) + path.replace(_base,&#39;&#39;);
+    path = path.length &gt; 1 ? path.replace(/\/$/,&#39;&#39;) : path;
+    this.fullPath = path;
+    path = _hash ? path.split(&#39;#!&#39;)[1] : (_base ? path.replace(_base,&#39;&#39;) : path);
+    this.title = document.title;
+    this.params = {};
+    var h = path.split(&#39;#&#39;);
+    path = h[0];
+    this.hash = h[1] || &#39;&#39;;
+    var q = path.split(&#39;?&#39;);
+    path = q[0];
+    this.querystring = q[1] || &#39;&#39;;
+    this.path = path || &#39;/&#39;;
+}
+
+Context.prototype.saveState = function() {
+    history.replaceState(this.state, this.title, this.fullPath );
+};
+
+function middleware(route, callback) {
+    return function( context, next ) {
+        var match = route.regexp.exec(decodeURIComponent(context.path));
+        if( match ) {
+            fillParams(match, route.keys, context.params );
+            return callback(context);
+        }
+        next();
+    }
+}
+
+function fillParams(match, keys, params) {
+    var len = match.length;
+    var idx = 0;
+    var key, val;
+    while (++idx &lt; len) {
+        key = keys[idx - 1];
+        val = match[idx];
+        if (val !== undefined) {
+            params[key.name] = val;
+        }
+    }
+}
+
+function regexp(path, keys) {
+    var regex = path.replace(/\/(:?)([^\/?]+)(\??)(?=\/|$)/g,
+    function(match, isVariable, segment, isOptional) {
+        if(isVariable) keys.push({ name: segment });
+        return isVariable ? isOptional ? &#39;(?:\\/([^\\/]+))?&#39; : &#39;\\/([^\\/]+)&#39; : &#39;\\/&#39; + segment;
+    });
+    regex = regex === &#39;*&#39; ? &#39;(.*)&#39; : (regex === &#39;/&#39; ? &#39;&#39; : regex);
+    if (keys.length === 0) keys.push({name: 0});
+    return new RegExp( &#39;^&#39; + regex + &#39;(?:\\/(?=$))?$&#39;,&#39;i&#39;);
+}
+</code></pre>
+<h2 id="testando">Testando</h2>
+<p>Crie um arquivo chamado <code>index.html</code>, e coloque o código abaixo. Agora você precisa levantar um servidor <strong>apache</strong>, <strong>node</strong>, <strong>python</strong> ... eu sempre recomendo o <a href="https://simbco.github.io/httpster/">httpster</a>.</p>
+<pre><code class="lang-markup">&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+  &lt;meta charset=&quot;UTF-8&quot;&gt;
+  &lt;title&gt;micro router&lt;/title&gt;
+  &lt;base href=&quot;/&quot;&gt;
+  &lt;style&gt;
+    body {
+      background: #fff;
+      color: #666;
+      font-size: 1.1em;
+    }
+    a {
+      color: #444;
+      text-decoration: none;
+      text-shadow: -1px -1px 1px rgba(0,0,0,0.1);
+    }
+    a:hover {
+      color: #44666D;
+    }
+    h1 a {
+      display: inline-block;
+      color: #FC0E49;
+    }
+    .limiter {
+      margin: 0 auto;
+      max-width: 600px;
+      text-align: center;
+    }
+    ul li {
+      display: inline-block;
+      margin: 0 10px;
+    }
+    .display {
+      margin: 20px auto;
+      padding: 20px;
+      border-radius: 10px;
+      border: solid 1px #eee;
+    }
+  &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;div class=&quot;limiter&quot;&gt;
+    &lt;h1&gt;&lt;a href=&quot;&quot;&gt;micro router&lt;/a&gt;&lt;/h1&gt;
+    &lt;ul&gt;
+      &lt;li&gt;&lt;a href=&quot;./&quot;&gt;Home&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href=&quot;./about&quot;&gt;About&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href=&quot;./post/42&quot;&gt;Post&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href=&quot;./posts/1/asc&quot;&gt;Posts&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href=&quot;./not-found&quot;&gt;Not Found&lt;/a&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+    &lt;div class=&quot;display&quot;&gt;&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;script src=&quot;/micror.js&quot;&gt;&lt;/script&gt;
+  &lt;script&gt;
+
+    var display = document.querySelector(&#39;.display&#39;);
+
+    micror(&#39;/&#39;, function(ctx) {
+      display.textContent = &#39;Rota Home&#39;;
+    });
+
+    micror(&#39;/about&#39;, function(ctx) {
+      display.textContent = &#39;Rota About&#39;;
+    });
+
+    micror(&#39;/post/:id&#39;, function(ctx) {
+      display.textContent = &#39;Rota Post com id = &#39; + ctx.params.id;
+    });
+
+    micror(&#39;/posts/:page/:order?&#39;, function(ctx) {
+      var html = &#39;Rota Posts com page = &#39; + ctx.params.page;
+          html += &#39; e order = &#39; + ctx.params.order || &#39;&#39;;
+      display.textContent = html;
+    });
+
+    micror(&#39;*&#39;, function(ctx) {
+      display.textContent = &#39;PAGE NOT FOUND&#39;;
+    });
+
+    micror.run();
+
+    // Event Listener para os Links
+    var links = document.querySelectorAll(&#39;a&#39;);
+    var len = links.length;
+    while( len-- ) {
+      links[len].addEventListener(&#39;click&#39;, function(event) {
+        var element = event.target;
+        var path = element.pathname + element.search + (element.hash || &#39;&#39;);
+        micror.go(path);
+        event.preventDefault();
+      });
+    }
+
+  &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>Bom, depois teste passando a <code>base</code>.</p>
+<pre><code class="lang-javascript">micror.run({ base: &#39;/adm&#39;}); //(não esqueça de mudar a meta tag **base** no html né)
+</code></pre>
+<p>E o <code>hash</code>. </p>
+<pre><code class="lang-javascript">micror.run({ hash: true});
+</code></pre>
+<p>Teste, leia o código e se divirta. Caso tenha alguma dúvida me pergunte.</p>
+<p>Post bem comprido :P, no próximo vamos colocar umas features bem legais. </p>
+<p>Se conseguiu criar o router, <strong>deixe seu comentário aqui em baixo :)</strong>.</p>
+<p>Espero que tenham gostado. That&#39;s it !</p>
+
+      </article>
+      <!-- COMMENTS -->
+      <section id="comments">
+        <div id="disqus_thread"></div>
+        <script data-cfasync="true" type="text/javascript">
+            var disqus_shortname = 'expalmer';
+            var disqus_url = 'http://expalmer.github.io/criando-seu-proprio-client-router-em-javascript-parte-1/';
+            (function() {
+                var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+                (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+            })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+      </section>
+    </div>
+  </main>
+
+
+    <footer class="footer">
+      <p>Made with <a href="http://www.metalsmith.io/" title="Metalsmith">Metalsmith</a>. View <a href="https://github.com/expalmer/expalmer.github.io-files" title="Source">Source</a></p>
+    </footer>
+    <script src="/scripts/main.min.js"></script>
+  </body>
+</html>
