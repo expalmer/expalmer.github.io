@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+    
+    <title>Paginando nosso blog estático em Metalsmith | Palmer Oliveira. Juntos Aprendemos Mais!</title>
+    
+
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="white" />
+
+    <link rel="alternate" type="application/rss+xml" title="RSS 2.0" href="/rss.xml">
+
+    <meta name="HandheldFriendly" content="True" />
+    <meta name="MobileOptimized" content="320" />
+
+    <meta name="author" content="@expalmer">
+    <meta name="description" content="Agora vamos paginar nosso blog feito em Metalsmith.">
+    <link rel="canonical" href="http://expalmer.github.io/paginando-nosso-blog-est-tico-em-metalsmith">
+
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@expalmer">
+    <meta name="twitter:domain" content="http://expalmer.github.io">
+    <meta name="twitter:image:src" content="http://expalmer.github.io/images/palmer.jpg">
+    <meta name="twitter:creator" content="@expalmer">
+    <meta name="twitter:title" content="Paginando nosso blog estático em Metalsmith">
+    <meta name="twitter:description" content="Agora vamos paginar nosso blog feito em Metalsmith.">
+
+    <meta itemprop="name" content="Paginando nosso blog estático em Metalsmith">
+    <meta itemprop="description" content="Agora vamos paginar nosso blog feito em Metalsmith.">
+    <meta itemprop="image" content="http://expalmer.github.io/images/palmer.jpg">
+    <meta itemprop="url" content="http://expalmer.github.io/paginando-nosso-blog-est-tico-em-metalsmith">
+    <meta itemprop="author" content="@expalmer">
+    <meta itemprop="inLanguage" content="pt-BR">
+    <meta itemprop="keywords" content="metalsmith, javascript, nodejs">
+
+    <meta property="og:locale" content="pt_BR">
+    <meta property="og:type" content="article">
+    <meta property="og:image" content="http://expalmer.github.io/images/palmer.jpg">
+    <meta property="og:title" content="Paginando nosso blog estático em Metalsmith">
+    <meta property="og:description" content="Agora vamos paginar nosso blog feito em Metalsmith.">
+    <meta property="og:url" content="http://expalmer.github.io/paginando-nosso-blog-est-tico-em-metalsmith">
+    <meta property="og:site_name" content="Paginando nosso blog estático em Metalsmith">
+
+    <meta name="google-site-verification" content="BkRIiZn31VGZWd4NBpMhpA8pxdgnSOVwB0jaCFP800M" />
+
+    <link rel="stylesheet" href="/styles/main.min.css">
+
+    <link href="/favico.ico" rel="icon">
+
+  </head>
+  <body>
+    <header class="header">
+      <a href="http://expalmer.github.io" class="header__home" title="Blog do expalmer">
+        <figure>
+          <img src="http://expalmer.github.io/images/palmer.jpg" alt="Foto de um Panda de Óculos">
+        </figure>
+        <p>@expalmer</p>
+      </a>
+      <h1>A Javascript Enthusiast</h1>
+      <h2>Juntos Aprendemos Mais :)</h2>
+      <nav class="header__menu">
+        <ul class="menu">
+          <li><a href="http://expalmer.github.io" class="menu__link" title="Posts do Blog">Posts</a></li>
+          <li><a href="http://expalmer.github.io/tags/" class="menu__link" title="Tags do Blog">Tags</a></li>
+          <li><a href="https://github.com/expalmer" class="menu__link" title="Github do @expalmer">GitHub</a></li>
+          <li><a href="http://expalmer.github.io/rss.xml" class="menu__link" title="RSS do Blog">RSS</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    
+  <main class="main">
+    <div class="limiter">
+      <article class="article" itemscope itemtype="https://schema.org/Blog">
+        <header>
+          <time class="post__time" itemprop="datePublished" content="March 2, 2015" datetime="March 2, 2015">March 2, 2015</time>
+          <h1 class="post__title">Paginando nosso blog estático em Metalsmith</h1>
+          <iside class="post__related">
+            
+            <a href="http://expalmer.github.io/tags/metalsmith" class="atag metalsmith" title="Veja mais posts sobre metalsmith">metalsmith</a>
+            
+            <a href="http://expalmer.github.io/tags/javascript" class="atag javascript" title="Veja mais posts sobre javascript">javascript</a>
+            
+            <a href="http://expalmer.github.io/tags/nodejs" class="atag nodejs" title="Veja mais posts sobre nodejs">nodejs</a>
+            
+          </iside>
+        </header>
+        <p>Vamos adicionar agora uma <code>paginação</code> para nosso blog feito com <a href="http://metalsmith.io/">Metalsmith</a>.</p>
+<p>Vamos usar os mesmos arquivos do post anterior, <a href="http://expalmer.github.io/criando-um-blog-estatico-com-metalsmith-contendo-tags-gists-drafts-e-um-rss-feed/">esses aqui</a>, portanto vou postar apenas os arquivos novos ou que sofreram alteração.</p>
+<h3 id="1-instale-a-nova-depend-ncia-metalsmith-pagination-">1) Instale a nova dependência <code>metalsmith-pagination</code>.</h3>
+<pre><code class="lang-javascript">$ npm install metalsmith-pagination --save
+</code></pre>
+<p>Esse <code>save</code> no final é para incluir automaticamente no nosso arquivo <code>package.json</code> nossa dependência.</p>
+<h3 id="2-alterando-o-index-js-">2) Alterando o <code>index.js</code>.</h3>
+<pre><code class="lang-javascript">var Metalsmith   = require(&#39;metalsmith&#39;);
+var collections  = require(&#39;metalsmith-collections&#39;);
+var markdown     = require(&#39;metalsmith-markdown&#39;);
+var templates    = require(&#39;metalsmith-templates&#39;);
+var permalinks   = require(&#39;metalsmith-permalinks&#39;);
+var tags         = require(&#39;metalsmith-tags&#39;);
+var gist         = require(&#39;metalsmith-gist&#39;);
+var drafts       = require(&#39;metalsmith-drafts&#39;);
+var pagination   = require(&#39;metalsmith-pagination&#39;); // &lt;-- nova dependência
+
+var fs           = require(&#39;fs&#39;);
+var Handlebars   = require(&#39;handlebars&#39;);
+var moment       = require(&#39;moment&#39;);
+
+Handlebars.registerPartial({
+  &#39;header&#39;: fs.readFileSync(&#39;./templates/partials/header.hbt&#39;).toString(),
+  &#39;footer&#39;: fs.readFileSync(&#39;./templates/partials/footer.hbt&#39;).toString()
+});
+Handlebars.registerHelper(&#39;dateFormat&#39;, function( context ) {
+  return moment(context).format(&quot;LL&quot;);
+});
+Handlebars.registerHelper(&#39;dateGMT&#39;, function( context ) {
+  context = context === &#39;new&#39; ? new Date() : context;
+  return context.toGMTString();
+});
+// helpers para marcar a página corrente
+Handlebars.registerHelper(&#39;currentPage&#39;, function( current, page ) {
+  return current === page ? &#39;current&#39; : &#39;&#39;;
+});
+
+Metalsmith(__dirname)
+  .use(drafts())
+  .use(collections({
+      posts: {
+          pattern: &#39;posts/*.md&#39;,
+          sortBy: &#39;date&#39;,
+          reverse: true
+      }
+  }))
+  .use(markdown())
+  .use(permalinks({
+      pattern: &#39;:title&#39;,
+      relative: false
+  }))
+  // detalhe: o pagination usa o ``collection`` e por isso deve ser chamado após o mesmo.
+  // outro detalhe: nós estamos usando também o ``permalinks`` que altera o nome das páginas,
+  //                portanto precisamos declarar o pagination após ele também.
+  .use(pagination({
+    &#39;collections.posts&#39;: {  // aqui vai o nome da collection, no nosso caso, collections.posts
+      perPage: 2, // por página
+      template: &#39;indexWithPagination.hbt&#39;, // o template
+      first: &#39;index.html&#39;, // ele cria um index.html na raiz com a primeira página
+      path: &#39;:num/index.html&#39; // modelo de como quer que sejam criadas as demais páginas
+    }
+  }))
+  .use(gist())
+  .use(tags({
+    handle: &#39;tags&#39;,
+    template:&#39;tags.hbt&#39;,
+    path:&#39;tags&#39;,
+    sortBy: &#39;title&#39;,
+    reverse: true
+  }))
+  .use(templates(&#39;handlebars&#39;))
+  .destination(&#39;./build&#39;)
+  .build(function(err, files) {
+    if (err) { throw err; }
+  });
+</code></pre>
+<p>Note que no arquivo <code>index.js</code> criamos um <strong>handlebars helper</strong> chamado <code>currentPage</code>, ele será usado para colocar uma classe css na página corrente.</p>
+<h3 id="3-alterando-o-src-index-md-">3 ) Alterando o <code>src/index.md</code>.</h3>
+<pre><code class="lang-javascript">---
+template: indexWithPagination.hbt
+---
+
+Bem vindo ao meu blog! Confira abaixo meus **posts**.
+</code></pre>
+<h3 id="4-novo-template-template-indexwithpagination-hbt-">4 ) Novo template <code>template/indexWithPagination.hbt</code>.</h3>
+<p>Esse template será usado no lugar do <code>template/index.hbt</code>, pois agora teremos que fazer o <strong>each</strong> no novo objeto criado pelo <strong>metalsmith-pagination</strong> chamado <code>pagination</code>.</p>
+<pre><code class="lang-markup">{{&gt; header}}
+  &lt;section&gt;
+    &lt;h1&gt;Lista dos Posts Paginados&lt;/h1&gt;
+    &lt;h3&gt;Estamos na Página ({{pagination.num}})&lt;/h3&gt;
+    &lt;ul&gt;
+    {{#each pagination.files}}
+      &lt;li&gt;
+        &lt;a href=&quot;/{{this.path}}/index.html&quot; title=&quot;{{this.title}}&quot;&gt;
+          &lt;h2&gt;{{this.title}}&lt;/h2&gt;
+          &lt;time datetime=&quot;{{ dateFormat this.date }}&quot;&gt;{{ dateFormat this.date }}&lt;/time&gt;
+        &lt;/a&gt;
+      &lt;/li&gt;
+    {{/each}}
+    &lt;/ul&gt;
+    &lt;ul class=&quot;pagination&quot;&gt;
+      {{#if pagination.previous}}
+        &lt;li&gt;&lt;a href=&quot;/{{pagination.previous.path}}&quot;&gt;Prev&lt;/a&gt;&lt;/li&gt;
+      {{else}}
+        &lt;li class=&quot;inactive&quot;&gt;&lt;span&gt;Prev&lt;/span&gt;&lt;/li&gt;
+      {{/if}}
+      {{#each pagination.pages}}
+        &lt;li class=&quot;{{currentPage ../pagination.num this.pagination.num}}&quot;&gt;&lt;a href=&quot;/{{this.path}}&quot;&gt;{{this.pagination.num}}&lt;/a&gt;&lt;/li&gt;
+      {{/each}}
+      {{#if pagination.next}}
+        &lt;li&gt;&lt;a href=&quot;/{{pagination.next.path}}&quot;&gt;Next&lt;/a&gt;&lt;/li&gt;
+      {{else}}
+        &lt;li class=&quot;inactive&quot;&gt;&lt;span&gt;Next&lt;/span&gt;&lt;/li&gt;
+      {{/if}}
+    &lt;/ul&gt;
+  &lt;/section&gt;
+{{&gt; footer}}
+</code></pre>
+<p>Vamos encher nosso blog com mais 2 posts, para ficar melhor a visualização da nossa paginação.</p>
+<h3 id="5-novo-post-src-posts-post-5-md-">5 ) Novo Post <code>src/posts/post-5.md</code>.</h3>
+<pre><code class="lang-javascript">---
+title: Quinto post sobre produtividade no trabalho
+template: posts.hbt
+date: 2015-02-20
+description: Como ser mais produtivo no trabalho
+author: Palmer. Para o RSS Feed.
+tags: produtividade
+---
+
+## Quinto post sobre produtividade no trabalho
+
+- Lorem ipsum dolor.
+- Lorem ipsum dolor sit.
+
+Lorem ipsum dolor sit amet, consectetur adipisicing elit. Placeat amet, sapiente rem dolorum vitae aliquid illo ducimus laboriosam, quas molestiae quaerat corporis laborum! Ducimus asperiores nesciunt vel, nam sequi quasi! Similique explicabo, temporibus tenetur maxime iusto odit facere illo eligendi corrupti, consequatur soluta in itaque commodi id inventore. Rerum reiciendis necessitatibus, quaerat atque saepe, illum enim suscipit libero numquam maxime ad tempore. Dignissimos, delectus, ipsa. Mollitia veritatis vitae expedita iste hic praesentium numquam molestias quibusdam ad sed quia libero ipsum porro, cupiditate nisi. Nobis aspernatur id doloremque mollitia inventore delectus nesciunt vitae molestias. Deleniti, blanditiis, itaque. Odit voluptatem alias corporis.
+</code></pre>
+<h3 id="6-novo-post-src-posts-post-6-md-">6 ) Novo Post <code>src/posts/post-6.md</code>.</h3>
+<pre><code class="lang-javascript">---
+title: Fazer ou não fazer uma faculdade
+template: posts.hbt
+date: 2015-03-02
+description: Será que hoje para um desenvolvedor é necessário o canudo ?
+author: Palmer. Para o RSS Feed.
+tags: faculdade, profissao
+---
+
+## Fazer ou não fazer uma faculdade
+
+Lorem ``ipsum`` dolor sit amet, consectetur adipisicing elit. Eaque, at corporis recusandae eius magnam ducimus explicabo reiciendis. **Et eligendi** illo soluta laboriosam nulla, tempore, non, praesentium nobis sit facere fuga?
+</code></pre>
+<h3 id="7-adicione-no-final-do-src-css-style-css-">7 ) Adicione no final do <code>src/css/style.css</code>.</h3>
+<pre><code class="lang-css">pre {
+  padding: 20px;
+  background: #313430;
+  color: #D42EA4;
+  border-radius: 4px;
+}
+.pagination {
+  margin: 0;
+  padding: 0;
+}
+.pagination li {
+  display: inline-block;
+}
+.pagination li a,
+.pagination li span {
+  display: block;
+  padding: 4px 8px;
+  border: solid 1px #eee;
+  color: #111;
+  font-size: 0.9em;
+  text-decoration: none;
+}
+.pagination .current a {
+  color: #fff;
+  background: #FF0050;
+}
+.pagination .inactive span {
+  cursor: not-allowed;
+  color: #bbb;
+  background: #eee;
+}
+</code></pre>
+<h3 id="8-finalmente-execute-o-comando-na-raiz-do-diret-rio-">8) Finalmente execute o comando na raiz do diretório:</h3>
+<pre><code class="lang-javascript">$ node index.js
+</code></pre>
+<p>Note que agora no diretório <code>build</code>, teremos novos arquivos em <code>1/index.html, 2/index.html 3/index.html</code>.</p>
+<p>Isso porque temos <code>6</code> posts, e configuramos para <code>2</code> posts por página, ficando então 3 páginas.</p>
+<p>Se está usando o <strong>httpster</strong> então vá no diretório <code>build</code> e dê o comando <code>httpster</code>, então abra o browser em <code>http://localhost:3333/</code>.</p>
+<p>Coloquei no git o exemplo e os arquivos se quiser dar uma olhada: <a href="https://github.com/expalmer/blog-example-with-metalsmith">blog-example-with-metalsmith</a></p>
+<p>Bom acho que ficou claro, mas caso tenha dúvida é só me perguntar.</p>
+<p>Espero que tenham gostado. That&#39;s it !</p>
+
+      </article>
+      <!-- COMMENTS -->
+      <section id="comments">
+        <div id="disqus_thread"></div>
+        <script data-cfasync="true" type="text/javascript">
+            var disqus_shortname = 'expalmer';
+            var disqus_url = 'http://expalmer.github.io/paginando-nosso-blog-est-tico-em-metalsmith/';
+            (function() {
+                var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+                (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+            })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+      </section>
+    </div>
+  </main>
+
+
+    <footer class="footer">
+      <p>Made with <a href="http://www.metalsmith.io/" title="Metalsmith">Metalsmith</a>. View <a href="https://github.com/expalmer/expalmer.github.io-files" title="Source">Source</a></p>
+    </footer>
+    <script src="/scripts/main.min.js"></script>
+  </body>
+</html>
