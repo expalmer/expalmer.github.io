@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <title>Criando seu proprio Array MergeAll e Zip em Javascript - Palmer Oliveira. Juntos Aprendemos Mais!</title>
+  <title>Paginando nosso blog estatico em Metalsmith - Palmer Oliveira. Juntos Aprendemos Mais!</title>
   <link rel="alternate" type="application/rss+xml" title="RSS 2.0" href="http://expalmer.github.io/rss.xml">
   <link rel="stylesheet" href="/styles/main.min.css">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -9,22 +9,22 @@
   <meta charset="utf-8">
   <link rel="icon" type="image/png" href="http://expalmer.github.io/favicon.png">
 
-  <meta name="description" content="Aprendendo programação funcional criando funções auxiliares mergeAll e zip em javascript.">
+  <meta name="description" content="Agora vamos paginar nosso blog feito em Metalsmith.">
   <meta name="author" content="@expalmer">
   <meta name="robots" content="noodp"/>
-  <link rel="canonical" href="http://expalmer.github.io/criando-seu-proprio-array-mergeall-e-zip-em-javascript">
+  <link rel="canonical" href="http://expalmer.github.io/paginando-nosso-blog-estatico-em-metalsmith">
 
   <meta property="og:locale" content="pt_BR" />
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="Criando seu proprio Array MergeAll e Zip em Javascript - Palmer Oliveira. Juntos Aprendemos Mais!" />
-  <meta property="og:description" content="Aprendendo programação funcional criando funções auxiliares mergeAll e zip em javascript." />
-  <meta property="og:url" content="http://expalmer.github.io/criando-seu-proprio-array-mergeall-e-zip-em-javascript" />
+  <meta property="og:title" content="Paginando nosso blog estatico em Metalsmith - Palmer Oliveira. Juntos Aprendemos Mais!" />
+  <meta property="og:description" content="Agora vamos paginar nosso blog feito em Metalsmith." />
+  <meta property="og:url" content="http://expalmer.github.io/paginando-nosso-blog-estatico-em-metalsmith" />
   <meta property="og:site_name" content="Palmer Oliveira. Juntos Aprendemos Mais!" />
   <meta property="og:image" content="http://expalmer.github.io/images/palmer.jpg">
 
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:description" content="Aprendendo programação funcional criando funções auxiliares mergeAll e zip em javascript.">
-  <meta name="twitter:title" content="Criando seu proprio Array MergeAll e Zip em Javascript - Palmer Oliveira. Juntos Aprendemos Mais!">
+  <meta name="twitter:description" content="Agora vamos paginar nosso blog feito em Metalsmith.">
+  <meta name="twitter:title" content="Paginando nosso blog estatico em Metalsmith - Palmer Oliveira. Juntos Aprendemos Mais!">
   <meta name="twitter:site" content="@expalmer">
   <meta name="twitter:image" content="http://expalmer.github.io/images/palmer.jpg">
   <meta name="google-site-verification" content="BkRIiZn31VGZWd4NBpMhpA8pxdgnSOVwB0jaCFP800M" />
@@ -52,177 +52,205 @@
   <div class="limiter">
     <article class="article" itemscope itemtype="https://schema.org/Blog">
       <header>
-        <time class="post__time" itemprop="datePublished" content="December 28, 2015" datetime="December 28, 2015">December 28, 2015</time>
-        <h1 class="post__title">Criando seu próprio Array MergeAll e Zip em Javascript</h1>
+        <time class="post__time" itemprop="datePublished" content="March 2, 2015" datetime="March 2, 2015">March 2, 2015</time>
+        <h1 class="post__title">Paginando nosso blog estático em Metalsmith</h1>
         <iside class="post__related">
+          <a href="http://expalmer.github.io/tags/metalsmith" class="atag metalsmith" title="Veja mais posts sobre metalsmith">metalsmith</a>
           <a href="http://expalmer.github.io/tags/javascript" class="atag javascript" title="Veja mais posts sobre javascript">javascript</a>
+          <a href="http://expalmer.github.io/tags/nodejs" class="atag nodejs" title="Veja mais posts sobre nodejs">nodejs</a>
         </iside>
       </header>
-      <p>Neste post criaremos duas funções auxiliares chamadas de <code>mergeAll</code> e <code>zip</code>. Com elas teremos mais opções ao usar funções encadeadas junto com <strong>map</strong>, <strong>filter</strong> e <strong>reduce</strong>.</p>
-<h2 id="para-que-serve-o-mergeall-">Para que serve o mergeAll ?</h2>
-<p>Essa função serve para juntar um array multidimencional, ou seja, um array que contém outro array em cada um de seus itens. Por exemplo se temos um array assim <code>[ [1,2,3], [4,5,6], [7,8,9] ]</code>, e para que ele fique assim <code>[1,2,3,4,5,6,7,8,9]</code>, precisamos juntá-los.</p>
-<h2 id="mergeall">mergeAll</h2>
-<pre><code class="lang-javascript">Array.prototype.mergeAll = function() {
-    var results = [];
-    this.forEach(function(subArray) {
-        subArray.forEach(function( x ) {
-            results.push( x );
-        });
-    });
-    return results;
-};
+      <p>Vamos adicionar agora uma <code>paginação</code> para nosso blog feito com <a href="http://metalsmith.io/">Metalsmith</a>.</p>
+<p>Vamos usar os mesmos arquivos do post anterior, <a href="http://expalmer.github.io/criando-um-blog-estatico-com-metalsmith-contendo-tags-gists-drafts-e-um-rss-feed/">esses aqui</a>, portanto vou postar apenas os arquivos novos ou que sofreram alteração.</p>
+<h3 id="1-instale-a-nova-depend-ncia-metalsmith-pagination-">1) Instale a nova dependência <code>metalsmith-pagination</code>.</h3>
+<pre><code class="lang-javascript">$ npm install metalsmith-pagination --save
 </code></pre>
-<p>Aqui pegamos os resultados usando nosso anteriormente criado <a href="http://expalmer.github.io/criando-seu-proprio-array-foreach-array-map-e-array-filter-em-javascript/"><code>forEach</code></a>, e iteramos cada um dos itens cancatenando-os, e no final temos um único array.</p>
-<h3 id="pegando-apenas-os-nomes">Pegando apenas os nomes</h3>
-<p>Vamos usar esses dados de exemplo.</p>
-<pre><code class="lang-javascript">var lordOfTheRings = [
-  {
-    race: &#39;Elves&#39;,
-    characters: [
-      {
-        name: &quot;Galadriel&quot;,
-        weapons: [ &quot;Elven Magic&quot;, &quot;Nenya&quot; ]
-      },
-      {
-        name: &quot;Legolas&quot;,
-        weapons: [ &quot;Bow&quot;, &quot;Knife&quot; ]
-      }
-    ]
-  },
-  {
-    race: &#39;Maiar&#39;,
-    characters: [
-      {
-        name: &quot;Gandalf&quot;,
-        weapons: [ &quot;Glamdring&quot;, &quot;Wizard Staff&quot;, &quot;Sword&quot; ]
-      },
-      {
-        name: &quot;Radagast&quot;,
-        weapons: [ &quot;Powers of the Maiar&quot;, &quot;Wizard Staff&quot; ]
-      }
-    ]
-  },
-  {
-    race: &#39;Men&#39;,
-    characters: [
-      {
-        name: &quot;Aragorn&quot;,
-        weapons: [ &quot;Anduril&quot;, &quot;Sword&quot; ]
-      },
-      {
-        name: &quot;Faramir&quot;,
-        weapons: [ &quot;Bow&quot;, &quot;Sword&quot; ]
-      }
-    ]
-  },
-  {
-    race: &quot;Ainur&quot;,
-    characters: [
-      {
-        name: &quot;Sauron&quot;,
-        weapons: [ &quot;One Ring&quot;, &quot;Sword&quot;, &quot;Powers of the Maiar&quot; ]
-      }
-    ]
-  }
-];
-</code></pre>
-<p>O que preciso é criar um array com todos os nomes de cada um dos personagens que estão separados por raça.</p>
-<p>Vamos primeiramente fazer assim:</p>
-<pre><code class="lang-javascript">var names = lordOfTheRings
-  .map(function(item){
-    return item.characters
-      .map(function( character ) {
-        return character.name;
-      });
-  });
+<p>Esse <code>save</code> no final é para incluir automaticamente no nosso arquivo <code>package.json</code> nossa dependência.</p>
+<h3 id="2-alterando-o-index-js-">2) Alterando o <code>index.js</code>.</h3>
+<pre><code class="lang-javascript">var Metalsmith   = require(&#39;metalsmith&#39;);
+var collections  = require(&#39;metalsmith-collections&#39;);
+var markdown     = require(&#39;metalsmith-markdown&#39;);
+var templates    = require(&#39;metalsmith-templates&#39;);
+var permalinks   = require(&#39;metalsmith-permalinks&#39;);
+var tags         = require(&#39;metalsmith-tags&#39;);
+var gist         = require(&#39;metalsmith-gist&#39;);
+var drafts       = require(&#39;metalsmith-drafts&#39;);
+var pagination   = require(&#39;metalsmith-pagination&#39;); // &lt;-- nova dependência
 
-console.log(names);
-/*
-[ 
-  [ &#39;Galadriel&#39;, &#39;Legolas&#39; ],
-  [ &#39;Gandalf&#39;, &#39;Radagast&#39; ],
-  [ &#39;Aragorn&#39;, &#39;Faramir&#39; ],
-  [ &#39;Sauron&#39; ] 
-]
-*/
-</code></pre>
-<p>Note que temos 4 arrays dentro de um array... então usamos o <code>mergeAll</code>.</p>
-<pre><code class="lang-javascript">var names = lordOfTheRings
-  .map(function(item){
-    return item.characters
-      .map(function( character ) {
-        return character.name;
-      });
-  }).mergeAll();
+var fs           = require(&#39;fs&#39;);
+var Handlebars   = require(&#39;handlebars&#39;);
+var moment       = require(&#39;moment&#39;);
 
-console.log(names);
-/*
-[ &#39;Galadriel&#39;,
-  &#39;Legolas&#39;,
-  &#39;Gandalf&#39;,
-  &#39;Radagast&#39;,
-  &#39;Aragorn&#39;,
-  &#39;Faramir&#39;,
-  &#39;Sauron&#39; ]
-*/
-</code></pre>
-<p>No final de nosso <strong>map</strong>, chamamos a função <strong>mergeAll</strong>, e agora sim temos um único array :)</p>
-<h2 id="para-que-serve-o-zip-">Para que serve o zip ?</h2>
-<p>Essa função serve para iterar dois arrays ao mesmo tempo, aplicando uma função callback para ambos. Isso é útil quando temos dois arrays que possuem alguma ligação em relação aos seus indíces.</p>
-<h2 id="zip">zip</h2>
-<pre><code class="lang-javascript">Array.zip = function(left, right, callback) {
-  var len = Math.min(left.length, right.length); // pegamos o menor tamanho
-  var results = [];
-  for( var i = 0; i &lt; len; i++ ) {
-    results.push( callback(left[i], right[i]) );
-  }
-  return results;
-};
-</code></pre>
-<p>O que fazemos aqui é receber 3 argumentos, <strong>(1)</strong> o primeiro array, <strong>(2)</strong> o segundo array e <strong>(3)</strong> a função callback que vai iterar um por um dos itens dos array.</p>
-<p>Note que se os arrays forem de tamanhos diferentes, ele irá pegar o tamanho do array menor. E também que essa função não vai no prototype, pois passamos duas referências de objetos/arrays diferentes.</p>
-<h3 id="ligando-dois-arrays">Ligando dois arrays</h3>
-<p>Imagine esse cenário, onde no primeiro array, tenho os personagens e no segundo tenho as armas. O que eu preciso, é um novo objeto que pegue do primeito array apenas o <code>name</code>, e pegue do segundo array apenas a último item de <code>weapons</code>.</p>
-<pre><code class="lang-javascript">var characters = [
-  { name: &quot;Galadriel&quot; },
-  { name: &quot;Legolas&quot; },
-  { name: &quot;Gandalf&quot; },
-  { name: &quot;Radagast&quot; },
-  { name: &quot;Aragorn&quot; },
-  { name: &quot;Faramir&quot; },
-  { name: &quot;Sauron&quot; }
-];
-
-var weapons = [
-  [ &quot;Elven Magic&quot;, &quot;Nenya&quot; ],
-  [ &quot;Bow&quot;, &quot;Knife&quot; ],
-  [ &quot;Glamdring&quot;, &quot;Wizard Staff&quot;, &quot;Sword&quot; ],
-  [ &quot;Powers of the Maiar&quot;, &quot;Wizard Staff&quot; ],
-  [ &quot;Anduril&quot;, &quot;Sword&quot; ],
-  [ &quot;Bow&quot;, &quot;Sword&quot; ],
-  [ &quot;One Ring&quot;, &quot;Sword&quot;, &quot;Powers of the Maiar&quot; ]
-];
-
-var joined = Array.zip( characters, weapons, function( character, weapons ) {
-  return { name: character.name, weapon: weapons.pop() };
+Handlebars.registerPartial({
+  &#39;header&#39;: fs.readFileSync(&#39;./templates/partials/header.hbt&#39;).toString(),
+  &#39;footer&#39;: fs.readFileSync(&#39;./templates/partials/footer.hbt&#39;).toString()
+});
+Handlebars.registerHelper(&#39;dateFormat&#39;, function( context ) {
+  return moment(context).format(&quot;LL&quot;);
+});
+Handlebars.registerHelper(&#39;dateGMT&#39;, function( context ) {
+  context = context === &#39;new&#39; ? new Date() : context;
+  return context.toGMTString();
+});
+// helpers para marcar a página corrente
+Handlebars.registerHelper(&#39;currentPage&#39;, function( current, page ) {
+  return current === page ? &#39;current&#39; : &#39;&#39;;
 });
 
-console.log(joined);
-
-/*
-[ 
-  { name: &#39;Galadriel&#39;, weapon: &#39;Nenya&#39; },
-  { name: &#39;Legolas&#39;, weapon: &#39;Knife&#39; },
-  { name: &#39;Gandalf&#39;, weapon: &#39;Sword&#39; },
-  { name: &#39;Radagast&#39;, weapon: &#39;Wizard Staff&#39; },
-  { name: &#39;Aragorn&#39;, weapon: &#39;Sword&#39; },
-  { name: &#39;Faramir&#39;, weapon: &#39;Sword&#39; },
-  { name: &#39;Sauron&#39;, weapon: &#39;Powers of the Maiar&#39; } 
-]
-*/
+Metalsmith(__dirname)
+  .use(drafts())
+  .use(collections({
+      posts: {
+          pattern: &#39;posts/*.md&#39;,
+          sortBy: &#39;date&#39;,
+          reverse: true
+      }
+  }))
+  .use(markdown())
+  .use(permalinks({
+      pattern: &#39;:title&#39;,
+      relative: false
+  }))
+  // detalhe: o pagination usa o ``collection`` e por isso deve ser chamado após o mesmo.
+  // outro detalhe: nós estamos usando também o ``permalinks`` que altera o nome das páginas,
+  //                portanto precisamos declarar o pagination após ele também.
+  .use(pagination({
+    &#39;collections.posts&#39;: {  // aqui vai o nome da collection, no nosso caso, collections.posts
+      perPage: 2, // por página
+      template: &#39;indexWithPagination.hbt&#39;, // o template
+      first: &#39;index.html&#39;, // ele cria um index.html na raiz com a primeira página
+      path: &#39;:num/index.html&#39; // modelo de como quer que sejam criadas as demais páginas
+    }
+  }))
+  .use(gist())
+  .use(tags({
+    handle: &#39;tags&#39;,
+    template:&#39;tags.hbt&#39;,
+    path:&#39;tags&#39;,
+    sortBy: &#39;title&#39;,
+    reverse: true
+  }))
+  .use(templates(&#39;handlebars&#39;))
+  .destination(&#39;./build&#39;)
+  .build(function(err, files) {
+    if (err) { throw err; }
+  });
 </code></pre>
-<p>Pronto, agora temos um único objeto.</p>
-<p>Agora que temos todas as funções     que precisamos, <a href="http://expalmer.github.io/criando-seu-proprio-array-foreach-array-map-e-array-filter-em-javascript/">map</a>, <a href="http://expalmer.github.io/criando-seu-proprio-array-foreach-array-map-e-array-filter-em-javascript/">filter</a>, <a href="http://expalmer.github.io/criando-seu-proprio-array-reduce-em-javascript/">reduce</a>, <a href="http://expalmer.github.io/criando-seu-proprio-array-mergeall-e-zip-em-javascript/">mergeAll</a> e <a href="http://expalmer.github.io/criando-seu-proprio-array-mergeall-e-zip-em-javascript/">zip</a>, nos próximos posts veremos como usá-las juntas para criarmos consultas interessantes e super úteis.</p>
+<p>Note que no arquivo <code>index.js</code> criamos um <strong>handlebars helper</strong> chamado <code>currentPage</code>, ele será usado para colocar uma classe css na página corrente.</p>
+<h3 id="3-alterando-o-src-index-md-">3 ) Alterando o <code>src/index.md</code>.</h3>
+<pre><code class="lang-javascript">---
+template: indexWithPagination.hbt
+---
+
+Bem vindo ao meu blog! Confira abaixo meus **posts**.
+</code></pre>
+<h3 id="4-novo-template-template-indexwithpagination-hbt-">4 ) Novo template <code>template/indexWithPagination.hbt</code>.</h3>
+<p>Esse template será usado no lugar do <code>template/index.hbt</code>, pois agora teremos que fazer o <strong>each</strong> no novo objeto criado pelo <strong>metalsmith-pagination</strong> chamado <code>pagination</code>.</p>
+<pre><code class="lang-markup">{{&gt; header}}
+  &lt;section&gt;
+    &lt;h1&gt;Lista dos Posts Paginados&lt;/h1&gt;
+    &lt;h3&gt;Estamos na Página ({{pagination.num}})&lt;/h3&gt;
+    &lt;ul&gt;
+    {{#each pagination.files}}
+      &lt;li&gt;
+        &lt;a href=&quot;/{{this.path}}/index.html&quot; title=&quot;{{this.title}}&quot;&gt;
+          &lt;h2&gt;{{this.title}}&lt;/h2&gt;
+          &lt;time datetime=&quot;{{ dateFormat this.date }}&quot;&gt;{{ dateFormat this.date }}&lt;/time&gt;
+        &lt;/a&gt;
+      &lt;/li&gt;
+    {{/each}}
+    &lt;/ul&gt;
+    &lt;ul class=&quot;pagination&quot;&gt;
+      {{#if pagination.previous}}
+        &lt;li&gt;&lt;a href=&quot;/{{pagination.previous.path}}&quot;&gt;Prev&lt;/a&gt;&lt;/li&gt;
+      {{else}}
+        &lt;li class=&quot;inactive&quot;&gt;&lt;span&gt;Prev&lt;/span&gt;&lt;/li&gt;
+      {{/if}}
+      {{#each pagination.pages}}
+        &lt;li class=&quot;{{currentPage ../pagination.num this.pagination.num}}&quot;&gt;&lt;a href=&quot;/{{this.path}}&quot;&gt;{{this.pagination.num}}&lt;/a&gt;&lt;/li&gt;
+      {{/each}}
+      {{#if pagination.next}}
+        &lt;li&gt;&lt;a href=&quot;/{{pagination.next.path}}&quot;&gt;Next&lt;/a&gt;&lt;/li&gt;
+      {{else}}
+        &lt;li class=&quot;inactive&quot;&gt;&lt;span&gt;Next&lt;/span&gt;&lt;/li&gt;
+      {{/if}}
+    &lt;/ul&gt;
+  &lt;/section&gt;
+{{&gt; footer}}
+</code></pre>
+<p>Vamos encher nosso blog com mais 2 posts, para ficar melhor a visualização da nossa paginação.</p>
+<h3 id="5-novo-post-src-posts-post-5-md-">5 ) Novo Post <code>src/posts/post-5.md</code>.</h3>
+<pre><code class="lang-javascript">---
+title: Quinto post sobre produtividade no trabalho
+template: posts.hbt
+date: 2015-02-20
+description: Como ser mais produtivo no trabalho
+author: Palmer. Para o RSS Feed.
+tags: produtividade
+---
+
+## Quinto post sobre produtividade no trabalho
+
+- Lorem ipsum dolor.
+- Lorem ipsum dolor sit.
+
+Lorem ipsum dolor sit amet, consectetur adipisicing elit. Placeat amet, sapiente rem dolorum vitae aliquid illo ducimus laboriosam, quas molestiae quaerat corporis laborum! Ducimus asperiores nesciunt vel, nam sequi quasi! Similique explicabo, temporibus tenetur maxime iusto odit facere illo eligendi corrupti, consequatur soluta in itaque commodi id inventore. Rerum reiciendis necessitatibus, quaerat atque saepe, illum enim suscipit libero numquam maxime ad tempore. Dignissimos, delectus, ipsa. Mollitia veritatis vitae expedita iste hic praesentium numquam molestias quibusdam ad sed quia libero ipsum porro, cupiditate nisi. Nobis aspernatur id doloremque mollitia inventore delectus nesciunt vitae molestias. Deleniti, blanditiis, itaque. Odit voluptatem alias corporis.
+</code></pre>
+<h3 id="6-novo-post-src-posts-post-6-md-">6 ) Novo Post <code>src/posts/post-6.md</code>.</h3>
+<pre><code class="lang-javascript">---
+title: Fazer ou não fazer uma faculdade
+template: posts.hbt
+date: 2015-03-02
+description: Será que hoje para um desenvolvedor é necessário o canudo ?
+author: Palmer. Para o RSS Feed.
+tags: faculdade, profissao
+---
+
+## Fazer ou não fazer uma faculdade
+
+Lorem ``ipsum`` dolor sit amet, consectetur adipisicing elit. Eaque, at corporis recusandae eius magnam ducimus explicabo reiciendis. **Et eligendi** illo soluta laboriosam nulla, tempore, non, praesentium nobis sit facere fuga?
+</code></pre>
+<h3 id="7-adicione-no-final-do-src-css-style-css-">7 ) Adicione no final do <code>src/css/style.css</code>.</h3>
+<pre><code class="lang-css">pre {
+  padding: 20px;
+  background: #313430;
+  color: #D42EA4;
+  border-radius: 4px;
+}
+.pagination {
+  margin: 0;
+  padding: 0;
+}
+.pagination li {
+  display: inline-block;
+}
+.pagination li a,
+.pagination li span {
+  display: block;
+  padding: 4px 8px;
+  border: solid 1px #eee;
+  color: #111;
+  font-size: 0.9em;
+  text-decoration: none;
+}
+.pagination .current a {
+  color: #fff;
+  background: #FF0050;
+}
+.pagination .inactive span {
+  cursor: not-allowed;
+  color: #bbb;
+  background: #eee;
+}
+</code></pre>
+<h3 id="8-finalmente-execute-o-comando-na-raiz-do-diret-rio-">8) Finalmente execute o comando na raiz do diretório:</h3>
+<pre><code class="lang-javascript">$ node index.js
+</code></pre>
+<p>Note que agora no diretório <code>build</code>, teremos novos arquivos em <code>1/index.html, 2/index.html 3/index.html</code>.</p>
+<p>Isso porque temos <code>6</code> posts, e configuramos para <code>2</code> posts por página, ficando então 3 páginas.</p>
+<p>Se está usando o <strong>httpster</strong> então vá no diretório <code>build</code> e dê o comando <code>httpster</code>, então abra o browser em <code>http://localhost:3333/</code>.</p>
+<p>Coloquei no git o exemplo e os arquivos se quiser dar uma olhada: <a href="https://github.com/expalmer/blog-example-with-metalsmith">blog-example-with-metalsmith</a></p>
+<p>Bom acho que ficou claro, mas caso tenha dúvida é só me perguntar.</p>
 <p>Espero que tenham gostado. That&#39;s it !</p>
 
     </article>
@@ -231,7 +259,7 @@ console.log(joined);
       <div id="disqus_thread"></div>
       <script data-cfasync="true" type="text/javascript">
           var disqus_shortname = 'expalmer';
-          var disqus_url = 'http://expalmer.github.io/criando-seu-proprio-array-mergeall-e-zip-em-javascript/';
+          var disqus_url = 'http://expalmer.github.io/paginando-nosso-blog-estatico-em-metalsmith/';
           (function() {
               var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
               dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';

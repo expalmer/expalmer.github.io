@@ -1,61 +1,40 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
+  <title>Criando seu proprio Client Router em Javascript - Parte 1 - Palmer Oliveira. Juntos Aprendemos Mais!</title>
+  <link rel="alternate" type="application/rss+xml" title="RSS 2.0" href="http://expalmer.github.io/rss.xml">
+  <link rel="stylesheet" href="/styles/main.min.css">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
   <meta charset="utf-8">
-    
-    <title>Criando seu proprio Client Router em Javascript - Parte 1 | Palmer Oliveira. Juntos Aprendemos Mais!</title>
-    
+  <link rel="icon" type="image/png" href="http://expalmer.github.io/favicon.png">
 
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="white" />
+  <meta name="description" content="Sempre quis saber como funciona um router em Javascript, então resolvi criar um.">
+  <meta name="author" content="@expalmer">
+  <meta name="robots" content="noodp"/>
+  <link rel="canonical" href="http://expalmer.github.io/criando-seu-proprio-client-router-em-javascript-parte-1">
 
-    <link rel="alternate" type="application/rss+xml" title="RSS 2.0" href="/rss.xml">
+  <meta property="og:locale" content="pt_BR" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Criando seu proprio Client Router em Javascript - Parte 1 - Palmer Oliveira. Juntos Aprendemos Mais!" />
+  <meta property="og:description" content="Sempre quis saber como funciona um router em Javascript, então resolvi criar um." />
+  <meta property="og:url" content="http://expalmer.github.io/criando-seu-proprio-client-router-em-javascript-parte-1" />
+  <meta property="og:site_name" content="Palmer Oliveira. Juntos Aprendemos Mais!" />
+  <meta property="og:image" content="http://expalmer.github.io/images/palmer.jpg">
 
-    <meta name="HandheldFriendly" content="True" />
-    <meta name="MobileOptimized" content="320" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:description" content="Sempre quis saber como funciona um router em Javascript, então resolvi criar um.">
+  <meta name="twitter:title" content="Criando seu proprio Client Router em Javascript - Parte 1 - Palmer Oliveira. Juntos Aprendemos Mais!">
+  <meta name="twitter:site" content="@expalmer">
+  <meta name="twitter:image" content="http://expalmer.github.io/images/palmer.jpg">
+  <meta name="google-site-verification" content="BkRIiZn31VGZWd4NBpMhpA8pxdgnSOVwB0jaCFP800M" />
 
-    <meta name="author" content="@expalmer">
-    <meta name="description" content="Sempre quis saber como funciona um router em Javascript, então resolvi criar um.">
-    <link rel="canonical" href="http://expalmer.github.io/criando-seu-proprio-client-router-em-javascript-parte-1">
-
-    <meta name="twitter:card" content="summary">
-    <meta name="twitter:site" content="@expalmer">
-    <meta name="twitter:domain" content="http://expalmer.github.io">
-    <meta name="twitter:image:src" content="http://expalmer.github.io/images/palmer.jpg">
-    <meta name="twitter:creator" content="@expalmer">
-    <meta name="twitter:title" content="Criando seu proprio Client Router em Javascript - Parte 1">
-    <meta name="twitter:description" content="Sempre quis saber como funciona um router em Javascript, então resolvi criar um.">
-
-    <meta itemprop="name" content="Criando seu proprio Client Router em Javascript - Parte 1">
-    <meta itemprop="description" content="Sempre quis saber como funciona um router em Javascript, então resolvi criar um.">
-    <meta itemprop="image" content="http://expalmer.github.io/images/palmer.jpg">
-    <meta itemprop="url" content="http://expalmer.github.io/criando-seu-proprio-client-router-em-javascript-parte-1">
-    <meta itemprop="author" content="@expalmer">
-    <meta itemprop="inLanguage" content="pt-BR">
-    <meta itemprop="keywords" content="javascript">
-
-    <meta property="og:locale" content="pt_BR">
-    <meta property="og:type" content="article">
-    <meta property="og:image" content="http://expalmer.github.io/images/palmer.jpg">
-    <meta property="og:title" content="Criando seu proprio Client Router em Javascript - Parte 1">
-    <meta property="og:description" content="Sempre quis saber como funciona um router em Javascript, então resolvi criar um.">
-    <meta property="og:url" content="http://expalmer.github.io/criando-seu-proprio-client-router-em-javascript-parte-1">
-    <meta property="og:site_name" content="Criando seu proprio Client Router em Javascript - Parte 1">
-
-    <meta name="google-site-verification" content="BkRIiZn31VGZWd4NBpMhpA8pxdgnSOVwB0jaCFP800M" />
-
-    <link rel="stylesheet" href="/styles/main.min.css">
-
-    <link href="/favico.ico" rel="icon">
-
-  </head>
+</head>
   <body>
     <header class="header">
-      <a href="http://expalmer.github.io" class="header__home" title="Blog do expalmer">
+      <a href="/" class="header__home" title="Blog do expalmer">
         <figure>
-          <img src="http://expalmer.github.io/images/palmer.jpg" alt="Foto de um Panda de Óculos">
+          <img src="data:image/jpeg;base64,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" alt="Foto de um Panda de Óculos">
         </figure>
         <p>@expalmer</p>
       </a>
@@ -63,28 +42,23 @@
       <h2>Juntos Aprendemos Mais :)</h2>
       <nav class="header__menu">
         <ul class="menu">
-          <li><a href="http://expalmer.github.io" class="menu__link" title="Posts do Blog">Posts</a></li>
-          <li><a href="http://expalmer.github.io/tags/" class="menu__link" title="Tags do Blog">Tags</a></li>
+          <li><a href="http://expalmer.github.io/" class="menu__link" title="Posts do Blog">Posts</a></li>
+          <li><a href="http://expalmer.github.io/tags" class="menu__link" title="Tags do Blog">Tags</a></li>
           <li><a href="https://github.com/expalmer" class="menu__link" title="Github do @expalmer">GitHub</a></li>
           <li><a href="http://expalmer.github.io/rss.xml" class="menu__link" title="RSS do Blog">RSS</a></li>
         </ul>
       </nav>
-    </header>
-
-    
-  <main class="main">
-    <div class="limiter">
-      <article class="article" itemscope itemtype="https://schema.org/Blog">
-        <header>
-          <time class="post__time" itemprop="datePublished" content="January 4, 2016" datetime="January 4, 2016">January 4, 2016</time>
-          <h1 class="post__title">Criando seu próprio Client Router em Javascript - Parte 1</h1>
-          <iside class="post__related">
-            
-            <a href="http://expalmer.github.io/tags/javascript" class="atag javascript" title="Veja mais posts sobre javascript">javascript</a>
-            
-          </iside>
-        </header>
-        <p>Lí todo código do <strong>router</strong> <a href="https://visionmedia.github.io/page.js/">pagejs</a>, e o que vamos fazer é praticamente reescrevê-lo passo a passo, e acredito que você vai aprender alguns truques assim como eu aprendi.</p>
+    </header><main class="main">
+  <div class="limiter">
+    <article class="article" itemscope itemtype="https://schema.org/Blog">
+      <header>
+        <time class="post__time" itemprop="datePublished" content="January 4, 2016" datetime="January 4, 2016">January 4, 2016</time>
+        <h1 class="post__title">Criando seu próprio Client Router em Javascript - Parte 1</h1>
+        <iside class="post__related">
+          <a href="http://expalmer.github.io/tags/javascript" class="atag javascript" title="Veja mais posts sobre javascript">javascript</a>
+        </iside>
+      </header>
+      <p>Lí todo código do <strong>router</strong> <a href="https://visionmedia.github.io/page.js/">pagejs</a>, e o que vamos fazer é praticamente reescrevê-lo passo a passo, e acredito que você vai aprender alguns truques assim como eu aprendi.</p>
 <p>Dividi o post em 2 partes, esse primeiro criando um router básico, e na sequencia um mais completo.</p>
 <p>Acredito que para quem é iniciante em Javascript o código seja um pouco hard, mas vou tentar explicar com o máximo de detalhes possíveis, e se der tudo certo, você terá escrito seu próprio router para usar em seus projetos.</p>
 <h2 id="funcionamento-do-router">Funcionamento do router</h2>
@@ -504,25 +478,23 @@ function regexp(path, keys) {
 <p>Se conseguiu criar o router, <strong>deixe seu comentário aqui em baixo :)</strong>.</p>
 <p>Espero que tenham gostado. That&#39;s it !</p>
 
-      </article>
-      <!-- COMMENTS -->
-      <section id="comments">
-        <div id="disqus_thread"></div>
-        <script data-cfasync="true" type="text/javascript">
-            var disqus_shortname = 'expalmer';
-            var disqus_url = 'http://expalmer.github.io/criando-seu-proprio-client-router-em-javascript-parte-1/';
-            (function() {
-                var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-                dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
-                (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-            })();
-        </script>
-        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-      </section>
-    </div>
-  </main>
-
-
+    </article>
+    <!-- COMMENTS -->
+    <section id="comments">
+      <div id="disqus_thread"></div>
+      <script data-cfasync="true" type="text/javascript">
+          var disqus_shortname = 'expalmer';
+          var disqus_url = 'http://expalmer.github.io/criando-seu-proprio-client-router-em-javascript-parte-1/';
+          (function() {
+              var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+              dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+              (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+      </script>
+      <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </section>
+  </div>
+</main>
     <footer class="footer">
       <p>Made with <a href="http://www.metalsmith.io/" title="Metalsmith">Metalsmith</a>. View <a href="https://github.com/expalmer/expalmer.github.io-files" title="Source">Source</a></p>
     </footer>

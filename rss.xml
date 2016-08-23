@@ -10,162 +10,3198 @@
         <title>Palmer Oliveira. Juntos Aprendemos Mais!</title>
         <link>http://expalmer.github.io</link>
       </image>
-      <pubDate>Sat, 23 Jan 2016 17:01:08 GMT</pubDate>
-      <lastBuildDate>Sat, 23 Jan 2016 17:01:08 GMT</lastBuildDate>
+      <pubDate>Tue, 23 Aug 2016 18:53:26 GMT</pubDate>
+      <lastBuildDate>Tue, 23 Aug 2016 18:53:26 GMT</lastBuildDate>
       <language>pt-BR</language>
       <generator>Metalsmith custom plugin</generator>
       <ttl>60</ttl>
-      
       <item>
         <title><![CDATA[Criando seu próprio Client Router em Javascript - Parte 1]]></title>
         <description><![CDATA[Sempre quis saber como funciona um router em Javascript, então resolvi criar um.]]></description>
         <link>http://expalmer.github.io/criando-seu-proprio-client-router-em-javascript-parte-1/</link>
         <guid isPermaLink="true">http://expalmer.github.io/criando-seu-proprio-client-router-em-javascript-parte-1/</guid>
-        
         <category><![CDATA[javascript]]></category>
-        
         <dc:creator><![CDATA[Palmer Oliveira]]></dc:creator>
         <pubDate>Mon, 04 Jan 2016 20:40:06 GMT</pubDate>
         <content:encoded>
-          <![CDATA[]]>
+          <![CDATA[<p>Lí todo código do <strong>router</strong> <a href="https://visionmedia.github.io/page.js/">pagejs</a>, e o que vamos fazer é praticamente reescrevê-lo passo a passo, e acredito que você vai aprender alguns truques assim como eu aprendi.</p>
+<p>Dividi o post em 2 partes, esse primeiro criando um router básico, e na sequencia um mais completo.</p>
+<p>Acredito que para quem é iniciante em Javascript o código seja um pouco hard, mas vou tentar explicar com o máximo de detalhes possíveis, e se der tudo certo, você terá escrito seu próprio router para usar em seus projetos.</p>
+<h2 id="funcionamento-do-router">Funcionamento do router</h2>
+<p>O router deve criar <strong>rotas</strong>, ou seja, informar um <strong>path</strong> e executar um <strong>callback</strong> quando esse <strong>path</strong> for chamado.</p>
+<p>Nosso router será uma função chamada <code>micror</code> (<strong>micro r</strong>outer...entendeu?) e seus métodos serão:</p>
+<ul>
+<li><code>micror( path, callback )</code> Cria uma rota</li>
+<li><code>micror.go( path )</code> Chama uma rota</li>
+<li><code>micror.run( options )</code> Inicia o router</li>
+</ul>
+<h4 id="criando-uma-rota">Criando uma rota</h4>
+<p>Aqui passamos o <strong>path</strong> e o <strong>callback</strong>.</p>
+<pre><code class="lang-javascript">micror(&#39;/&#39;, function(context) {
+    console.log(&#39;Home&#39;);
+});
+</code></pre>
+<h4 id="chamando-uma-rota">Chamando uma rota</h4>
+<p>Aqui estamos chamando o <strong>path</strong> <code>/</code> que executará a rota que criamos acima.</p>
+<pre><code class="lang-javascript">micror.go(&#39;/&#39;);
+</code></pre>
+<h4 id="iniciando-o-router">Iniciando o router</h4>
+<p>Iniciar é opcional, mas iremos chamar essa função para pegar a <code>url atual</code>e internamente executar o <code>micror.go(&#39;url_atual&#39;)</code>.</p>
+<p>Nessa função podemos passar um objeto com 2 opções, que também são opcionais:</p>
+<ul>
+<li>Opção para <strong>base</strong> url: <code>{ base: &#39;/adm&#39; }</code>.</li>
+<li>Opção para <strong>hash</strong> /!#: <code>{ hash: true }</code>.</li>
+</ul>
+<pre><code class="lang-javascript">micror.run(); // micror.run( { base: &#39;/adm&#39;, hash: &#39;true&#39;} );
+</code></pre>
+<h4 id="criando-uma-rota-com-par-metros">Criando uma rota com parâmetros</h4>
+<p>Nós precisamos passar parâmetros em algumas rotas, por exemplo um <code>id</code> de um post <code>&#39;/post/:id&#39;</code>, então note esses dois pontos <code>:</code>, isso significa que na rota <strong>post</strong>, vai ter um parâmetro chamado <code>id</code> e o mesmo é obrigatório.</p>
+<p>Mas existem situações que você precisa de um parâmetro, mas o mesmo é opcional, como por exemplo em <strong>posts</strong> <code>&#39;/posts/:page/:order?&#39;</code>, note que nessa rota temos o <code>:page</code> que é um parâmetro obrigatório, mas temos agora esse <code>:order?</code> onde temos um <code>?</code> no final, isso significa que o parâmetro é opcional.</p>
+<p>Tudo isso vai no objeto <code>context</code> que explico a seguir.</p>
+<pre><code class="lang-javascript">micror(&#39;/post/:id&#39;, function(context) {
+    console.log(context.params.id);
+});
+
+micror(&#39;/posts/:page/:order?&#39;, function(ctx) {
+    console.log(context.params.page);
+    console.log(context.params.order);
+});
+</code></pre>
+<h4 id="criando-uma-rota-universal">Criando uma rota universal</h4>
+<p>Podemos também criar um rota universal usando <code>*</code> que será chamada com qualquer <strong>path</strong> que colocarmos. Mas tem que se ligar na ordem onde a declaramos, pois se colocarmos na frente de todas as outras rotas, somente ela executará e não cairá nas demais. Por isso colocamos ela sempre no final para usar como um <code>not found</code>, ou seja, se não der <code>match</code> em nenhuma rota, cai nela ;)</p>
+<pre><code class="lang-javascript">micror(&#39;/&#39;, function(ctx) {
+    console.log(&#39;Home&#39;);
+});
+
+micror(&#39;/about&#39;, function(ctx) {
+    console.log(&#39;Home&#39;);
+});
+
+micror(&#39;*&#39;, function(ctx) {
+    console.log(&#39;Rota Universal - Not Found&#39;);
+});
+</code></pre>
+<h4 id="explicando-o-objeto-context">Explicando o objeto Context</h4>
+<p>Todo <strong>callback</strong> recebe uma instância do objeto <code>Context</code>, nele colocamos informações da <strong>url</strong> como <code>querystring</code> e <code>hash</code> (quando houver). Mas nela também pegamos os parâmetros (obrigatório e/ou opcional) informados na rota, e então colocamos no atributo <code>params</code>.</p>
+<p>Se chamamos algo assim <strong>micror.go(&#39;/posts/10?year=2016#results&#39;)</strong>, note que temos várias informações aqui, temos um parâmetro que vamos chamar de <strong>page</strong> <code>10</code>, temos o <strong>querystring</strong> <code>year=2016</code>e o <strong>hash</strong> <code>#results</code>. Confira como fica o <strong>context</strong> aqui.</p>
+<pre><code class="lang-javascript">micror(&#39;/posts/:page&#39;, function(context) {
+    console.log(&#39;page&#39;, context.params.page);
+    console.log(&#39;queryString&#39;, context.querystring);
+    console.log(&#39;hash&#39;, context.hash);
+});
+</code></pre>
+<h4 id="alterando-a-url">Alterando a Url</h4>
+<p>Cada vez que chamamos uma rota devemos alterar a <code>url</code>, e faremos isso com <a href="https://developer.mozilla.org/en-US/docs/Web/API/History_API#The_replaceState()_method">history.replaceState</a>.</p>
+<p>Bom acho que é isso, vamos criar nosso <strong>router</strong>. De repente algumas coisas não ficaram claras ainda, mas conforme criamos o código, as coisas vão clareando.</p>
+<h2 id="1-micror-js">1) micror.js</h2>
+<p>Crie um arquivo chamado <code>micror.js</code>, todo código vai nele.</p>
+<pre><code class="lang-javascript">
+var _base = &#39;&#39;; // base url
+var _hash = false; // controle por hash
+
+// nosso router :)
+function micror(path, callback){
+    // criamos um objeto &quot;route&quot;
+    var route = {
+      path: path,
+      keys: []
+    };
+    // regexp
+    route.regexp = regexp(path,route.keys);
+    // armazenando as rotas
+    micror.callbacks.push(middleware(route, callback));
+}
+
+// objeto que guarda as rotas
+micror.callbacks = [];
+</code></pre>
+<p>Cada vez que criamos uma rota, criamos um objeto chamado <code>route</code> que possui como atributos (<code>path</code>, <code>keys</code>, <code>regexp</code>).</p>
+<p>O atributo <code>route.regexp</code> chama a função <code>regexp</code> passando o <strong>path</strong> e suas <strong>keys</strong> que é um array vazio. A função retorna uma <strong>expressão regular</strong> que será usada para comparar a rota, e junto já extrai os parâmetros para colocar dentro de <code>keys</code>. Por exemplo, se damos o path <code>/posts/:page/:order?</code>, é retornado <code>/^\/posts\/([^\/]+)(?:\/([^\/]+))?(?:\/(?=$))?$/i</code>, e as <code>keys</code> ficarão assim <code>[ { name: 0 }, { name: &#39;page&#39; }, { name: &#39;order&#39; } ]</code>.</p>
+<p>A expressão regular acima diz que para fazer o <strong>match</strong>, precisa começar com <strong>/posts</strong> seguido de <strong>qualquer coisa que não seja uma barra e contenha mais de um caracter</strong>, seguido de <strong>opcionalmente qualquer coisa que não seja uma barra e contenha mais de um caracter</strong> e <strong>opcionalemente termine com uma barra</strong>. Ufa...</p>
+<p>Note que as <strong>keys</strong> já estão na ordem certinha dos parâmetros que informados na rota. Os parâmetros obrigatório e/ou opcionais que usamos <code>:</code> e <code>?</code>, são colocados os seus nomes (<code>{ name: &#39;page&#39; }</code>), nos parâmetros normais é colocado zero (<code>{ name: 0 }</code>).</p>
+<p>Mas para que isso tudo? Bom quando chamamos uma rota por exemplo <code>micror.go(&#39;/posts/10/asc&#39;)</code>, já que temos nossas <code>keys</code> na ordem certa, consiguimos juntar essas informações para colocar no <code>context</code>, saca só:</p>
+<pre><code class="lang-javascript">// Esse é o path da rota que criamos
+/posts/:page/:order?
+
+// as keys criadas pela função regexp
+[ { name: 0 }, { name: &#39;page&#39; }, { name: &#39;order&#39; } ]
+
+// o path chamado foi esse
+/posts/123/asc
+
+// e finalmente temos isso no context
+context.params.page = 123
+context.params.order = &#39;asc&#39;
+</code></pre>
+<p>Esse é o truque.</p>
+<h2 id="2-regexp-">2) regexp()</h2>
+<p>Essa é a função que faz tudo que falamos acima, dá uma conferida.</p>
+<pre><code class="lang-javascript">function regexp(path, keys) {
+    var regex = path.replace(/\/(:?)([^\/?]+)(\??)(?=\/|$)/g,
+    function(match, isVariable, segment, isOptional) {
+        if(isVariable) keys.push({ name: segment });
+        return isVariable ? isOptional ? &#39;(?:\\/([^\\/]+))?&#39; : &#39;\\/([^\\/]+)&#39; : &#39;\\/&#39; + segment;
+    });
+    regex = regex === &#39;*&#39; ? &#39;(.*)&#39; : (regex === &#39;/&#39; ? &#39;&#39; : regex);
+    if (keys.length === 0) keys.push({name: 0});
+    return new RegExp( &#39;^&#39; + regex + &#39;(?:\\/(?=$))?$&#39;,&#39;i&#39;);
+}
+</code></pre>
+<h2 id="3-middleware-">3) middleware()</h2>
+<p>Lá em cima fizemos isso <code>micror.callbacks.push(middleware(route, callback));</code>, aqui chamamos a função <code>middleware</code> passando o  objeto <code>route</code> e o <code>callback</code>. A função <strong>middleware</strong> retorna uma outra função que espera um objeto <code>context</code> e uma função <code>next</code>.</p>
+<p>Quando essa função for chamada, ela vai pegar o<code>context</code> passado e comparar com o objeto <code>route</code> que o originou, comparando o  <strong>route.regexp</strong> com o <strong>context.path</strong>. Se der <strong>match</strong> nós preenchemos o atributo <code>params</code> do <strong>context</strong> com as <code>keys</code> do <strong>route</strong> conforme falamos acima, e finalmente chamamos o <code>callback</code> passando o <strong>context</strong>.</p>
+<p>Caso não dê <strong>match</strong>, é chamado a função <code>next</code> que irá verificar outra rota até dar <strong>match</strong> ou acabar as rotas registradas.</p>
+<pre><code class="lang-javascript">function middleware(route, callback) {
+    return function( context, next ) {
+        var match = route.regexp.exec(decodeURIComponent(context.path));
+        if( match ) {
+            fillParams(match, route.keys, context.params );
+            return callback(context);
+        }
+        next();
+    }
+}
+</code></pre>
+<h2 id="4-fillparams">4) fillParams</h2>
+<p>Essa função faz aquilo que falamos lá em cima, de juntar as <code>keys</code> e os parâmetros que foram informados na <code>url</code>.</p>
+<pre><code class="lang-javascript">function fillParams(match, keys, params) {
+    var len = match.length;
+    var idx = 0;
+    var key, val;
+    while (++idx &lt; len) {
+        key = keys[idx - 1];
+        val = match[idx];
+        if (val !== undefined) {
+            params[key.name] = val;
+        }
+    }
+}
+</code></pre>
+<h2 id="5-micror-go-">5) micror.go()</h2>
+<p>Aqui é que verificamos cada um dos <code>callbacks</code> das rotas que foram registrados.</p>
+<p>Quando chamamos uma rota, primeiramente é criado uma instância do objeto <code>Context</code>, esse objeto pega o <code>path</code> passado e extrai várias informações importantes como:</p>
+<ul>
+<li><code>fullPath</code>: O <strong>path</strong> original com querystring e hash.</li>
+<li><code>path</code>: Aqui é retirado a querystring e hash para poder fazer o <strong>match</strong> com o <strong>route.regexp</strong></li>
+<li><code>querystring</code></li>
+<li><code>hash</code></li>
+<li><code>title</code>: Título da página</li>
+</ul>
+<p>O <strong>Context</strong> possui também um método para fazer o <code>replaceState</code>, e já fazemos isso após criá-lo.</p>
+<p>Agora chamo a função <code>callNextCallback</code> que começa com o índice zero, e verifica se possui uma função registrada em <code>micror.callbacks</code>, se sim, ele executa a função que é aquela função <strong>middleware</strong> passando o <code>context</code> e ela própria <strong>callNextCallback</strong>. Lembra que lá em cima a função <code>next</code> em <strong>middleware</strong>? Se não der <strong>match</strong> ele chama o <strong>next</strong> que é na real nossa <code>callNextCallback</code> somando +1 no nosso índice, e segue adiante até acabar as funções das rotas registrados...não é genial ?</p>
+<pre><code class="lang-javascript">micror.go = function(path) {
+    var context = new Context(path);
+    context.saveState();
+    var i = 0;
+    function callNextCallback() {
+        var callback = micror.callbacks[i++];
+          if(!callback) {
+               return console.log(&#39;route [&#39;, context.path, &#39;] not found&#39;);
+          }
+          callback( context, callNextCallback );
+    }
+    callNextCallback();
+};
+</code></pre>
+<h2 id="6-micror-run-">6) micror.run()</h2>
+<p>Aqui é simples, inicializamos nossas <strong>options</strong>, depois pegamos a <code>url</code> atual e já chamamos uma rota.</p>
+<pre><code class="lang-javascript">micror.run = function(opts) {
+    _base = opts &amp;&amp; opts.base ? opts.base : &#39;&#39;;
+    _hash = opts &amp;&amp; opts.hash ? &#39;#!&#39; : false;
+    var url = location.pathname + location.search + location.hash;
+    url = _base ? url.replace(_base, &#39;&#39;) : &#39;&#39;;
+    if( _hash &amp;&amp; ~location.hash.indexOf(&#39;#!&#39;) ) {
+      url = location.hash.substr(2) + location.search;
+    }
+    micror.go(url);
+};
+</code></pre>
+<h2 id="7-context-">7) Context()</h2>
+<pre><code class="lang-javascript">function Context(path) {
+    path = _base + (_hash ? &#39;/#!&#39; : &#39;&#39;) + path.replace(_base,&#39;&#39;);
+    path = path.length &gt; 1 ? path.replace(/\/$/,&#39;&#39;) : path;
+    this.fullPath = path;
+    path = _hash ? path.split(&#39;#!&#39;)[1] : (_base ? path.replace(_base,&#39;&#39;) : path);
+    this.title = document.title;
+    this.params = {};
+    var h = path.split(&#39;#&#39;);
+    path = h[0];
+    this.hash = h[1] || &#39;&#39;;
+    var q = path.split(&#39;?&#39;);
+    path = q[0];
+    this.querystring = q[1] || &#39;&#39;;
+    this.path = path || &#39;/&#39;;
+}
+
+Context.prototype.saveState = function() {
+    history.replaceState(this.state, this.title, this.fullPath );
+};
+</code></pre>
+<h2 id="c-digo-completo">Código completo</h2>
+<p>Segue o código completo agora.</p>
+<pre><code class="lang-javascript">var _base = &#39;&#39;;
+var _hash = false;
+
+function micror(path, callback){
+    var route = {
+      path: path,
+      keys: []
+    };
+    route.regexp = regexp(path,route.keys);
+    micror.callbacks.push(middleware(route, callback));
+}
+
+micror.callbacks = [];
+
+micror.go = function(path) {
+    var context = new Context(path);
+    context.saveState();
+    var i = 0;
+    function callNextCallback() {
+        var callback = micror.callbacks[i++];
+        if(!callback) {
+            return console.log(&#39;route [&#39;, context.path, &#39;] not found&#39;);
+        }
+        callback( context, callNextCallback );
+    }
+    callNextCallback();
+};
+
+micror.run = function(opts) {
+    _base = opts &amp;&amp; opts.base ? opts.base : &#39;&#39;;
+    _hash = opts &amp;&amp; opts.hash ? &#39;#!&#39; : false;
+    var url = location.pathname + location.search + location.hash;
+    url = _base ? url.replace(_base, &#39;&#39;) : &#39;&#39;;
+    if( _hash &amp;&amp; ~location.hash.indexOf(&#39;#!&#39;) ) {
+      url = location.hash.substr(2) + location.search;
+    }
+    micror.go(url);
+};
+
+function Context(path) {
+    path = _base + (_hash ? &#39;/#!&#39; : &#39;&#39;) + path.replace(_base,&#39;&#39;);
+    path = path.length &gt; 1 ? path.replace(/\/$/,&#39;&#39;) : path;
+    this.fullPath = path;
+    path = _hash ? path.split(&#39;#!&#39;)[1] : (_base ? path.replace(_base,&#39;&#39;) : path);
+    this.title = document.title;
+    this.params = {};
+    var h = path.split(&#39;#&#39;);
+    path = h[0];
+    this.hash = h[1] || &#39;&#39;;
+    var q = path.split(&#39;?&#39;);
+    path = q[0];
+    this.querystring = q[1] || &#39;&#39;;
+    this.path = path || &#39;/&#39;;
+}
+
+Context.prototype.saveState = function() {
+    history.replaceState(this.state, this.title, this.fullPath );
+};
+
+function middleware(route, callback) {
+    return function( context, next ) {
+        var match = route.regexp.exec(decodeURIComponent(context.path));
+        if( match ) {
+            fillParams(match, route.keys, context.params );
+            return callback(context);
+        }
+        next();
+    }
+}
+
+function fillParams(match, keys, params) {
+    var len = match.length;
+    var idx = 0;
+    var key, val;
+    while (++idx &lt; len) {
+        key = keys[idx - 1];
+        val = match[idx];
+        if (val !== undefined) {
+            params[key.name] = val;
+        }
+    }
+}
+
+function regexp(path, keys) {
+    var regex = path.replace(/\/(:?)([^\/?]+)(\??)(?=\/|$)/g,
+    function(match, isVariable, segment, isOptional) {
+        if(isVariable) keys.push({ name: segment });
+        return isVariable ? isOptional ? &#39;(?:\\/([^\\/]+))?&#39; : &#39;\\/([^\\/]+)&#39; : &#39;\\/&#39; + segment;
+    });
+    regex = regex === &#39;*&#39; ? &#39;(.*)&#39; : (regex === &#39;/&#39; ? &#39;&#39; : regex);
+    if (keys.length === 0) keys.push({name: 0});
+    return new RegExp( &#39;^&#39; + regex + &#39;(?:\\/(?=$))?$&#39;,&#39;i&#39;);
+}
+</code></pre>
+<h2 id="testando">Testando</h2>
+<p>Crie um arquivo chamado <code>index.html</code>, e coloque o código abaixo. Agora você precisa levantar um servidor <strong>apache</strong>, <strong>node</strong>, <strong>python</strong> ... eu sempre recomendo o <a href="https://simbco.github.io/httpster/">httpster</a>.</p>
+<pre><code class="lang-markup">&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+  &lt;meta charset=&quot;UTF-8&quot;&gt;
+  &lt;title&gt;micro router&lt;/title&gt;
+  &lt;base href=&quot;/&quot;&gt;
+  &lt;style&gt;
+    body {
+      background: #fff;
+      color: #666;
+      font-size: 1.1em;
+    }
+    a {
+      color: #444;
+      text-decoration: none;
+      text-shadow: -1px -1px 1px rgba(0,0,0,0.1);
+    }
+    a:hover {
+      color: #44666D;
+    }
+    h1 a {
+      display: inline-block;
+      color: #FC0E49;
+    }
+    .limiter {
+      margin: 0 auto;
+      max-width: 600px;
+      text-align: center;
+    }
+    ul li {
+      display: inline-block;
+      margin: 0 10px;
+    }
+    .display {
+      margin: 20px auto;
+      padding: 20px;
+      border-radius: 10px;
+      border: solid 1px #eee;
+    }
+  &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;div class=&quot;limiter&quot;&gt;
+    &lt;h1&gt;&lt;a href=&quot;&quot;&gt;micro router&lt;/a&gt;&lt;/h1&gt;
+    &lt;ul&gt;
+      &lt;li&gt;&lt;a href=&quot;./&quot;&gt;Home&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href=&quot;./about&quot;&gt;About&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href=&quot;./post/42&quot;&gt;Post&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href=&quot;./posts/1/asc&quot;&gt;Posts&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href=&quot;./not-found&quot;&gt;Not Found&lt;/a&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+    &lt;div class=&quot;display&quot;&gt;&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;script src=&quot;/micror.js&quot;&gt;&lt;/script&gt;
+  &lt;script&gt;
+
+    var display = document.querySelector(&#39;.display&#39;);
+
+    micror(&#39;/&#39;, function(ctx) {
+      display.textContent = &#39;Rota Home&#39;;
+    });
+
+    micror(&#39;/about&#39;, function(ctx) {
+      display.textContent = &#39;Rota About&#39;;
+    });
+
+    micror(&#39;/post/:id&#39;, function(ctx) {
+      display.textContent = &#39;Rota Post com id = &#39; + ctx.params.id;
+    });
+
+    micror(&#39;/posts/:page/:order?&#39;, function(ctx) {
+      var html = &#39;Rota Posts com page = &#39; + ctx.params.page;
+          html += &#39; e order = &#39; + ctx.params.order || &#39;&#39;;
+      display.textContent = html;
+    });
+
+    micror(&#39;*&#39;, function(ctx) {
+      display.textContent = &#39;PAGE NOT FOUND&#39;;
+    });
+
+    micror.run();
+
+    // Event Listener para os Links
+    var links = document.querySelectorAll(&#39;a&#39;);
+    var len = links.length;
+    while( len-- ) {
+      links[len].addEventListener(&#39;click&#39;, function(event) {
+        var element = event.target;
+        var path = element.pathname + element.search + (element.hash || &#39;&#39;);
+        micror.go(path);
+        event.preventDefault();
+      });
+    }
+
+  &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>Bom, depois teste passando a <code>base</code>.</p>
+<pre><code class="lang-javascript">micror.run({ base: &#39;/adm&#39;}); //(não esqueça de mudar a meta tag **base** no html né)
+</code></pre>
+<p>E o <code>hash</code>.</p>
+<pre><code class="lang-javascript">micror.run({ hash: true});
+</code></pre>
+<p>Teste, leia o código e se divirta. Caso tenha alguma dúvida me pergunte.</p>
+<p>Post bem comprido :P, no próximo vamos colocar umas features bem legais.</p>
+<p>Se conseguiu criar o router, <strong>deixe seu comentário aqui em baixo :)</strong>.</p>
+<p>Espero que tenham gostado. That&#39;s it !</p>
+]]>
         </content:encoded>
       </item>
-      
       <item>
         <title><![CDATA[Criando seu próprio Array MergeAll e Zip em Javascript]]></title>
         <description><![CDATA[Aprendendo programação funcional criando funções auxiliares mergeAll e zip em javascript.]]></description>
         <link>http://expalmer.github.io/criando-seu-proprio-array-mergeall-e-zip-em-javascript/</link>
         <guid isPermaLink="true">http://expalmer.github.io/criando-seu-proprio-array-mergeall-e-zip-em-javascript/</guid>
-        
         <category><![CDATA[javascript]]></category>
-        
         <dc:creator><![CDATA[Palmer Oliveira]]></dc:creator>
         <pubDate>Mon, 28 Dec 2015 19:00:06 GMT</pubDate>
         <content:encoded>
-          <![CDATA[]]>
+          <![CDATA[<p>Neste post criaremos duas funções auxiliares chamadas de <code>mergeAll</code> e <code>zip</code>. Com elas teremos mais opções ao usar funções encadeadas junto com <strong>map</strong>, <strong>filter</strong> e <strong>reduce</strong>.</p>
+<h2 id="para-que-serve-o-mergeall-">Para que serve o mergeAll ?</h2>
+<p>Essa função serve para juntar um array multidimencional, ou seja, um array que contém outro array em cada um de seus itens. Por exemplo se temos um array assim <code>[ [1,2,3], [4,5,6], [7,8,9] ]</code>, e para que ele fique assim <code>[1,2,3,4,5,6,7,8,9]</code>, precisamos juntá-los.</p>
+<h2 id="mergeall">mergeAll</h2>
+<pre><code class="lang-javascript">Array.prototype.mergeAll = function() {
+    var results = [];
+    this.forEach(function(subArray) {
+        subArray.forEach(function( x ) {
+            results.push( x );
+        });
+    });
+    return results;
+};
+</code></pre>
+<p>Aqui pegamos os resultados usando nosso anteriormente criado <a href="http://expalmer.github.io/criando-seu-proprio-array-foreach-array-map-e-array-filter-em-javascript/"><code>forEach</code></a>, e iteramos cada um dos itens cancatenando-os, e no final temos um único array.</p>
+<h3 id="pegando-apenas-os-nomes">Pegando apenas os nomes</h3>
+<p>Vamos usar esses dados de exemplo.</p>
+<pre><code class="lang-javascript">var lordOfTheRings = [
+  {
+    race: &#39;Elves&#39;,
+    characters: [
+      {
+        name: &quot;Galadriel&quot;,
+        weapons: [ &quot;Elven Magic&quot;, &quot;Nenya&quot; ]
+      },
+      {
+        name: &quot;Legolas&quot;,
+        weapons: [ &quot;Bow&quot;, &quot;Knife&quot; ]
+      }
+    ]
+  },
+  {
+    race: &#39;Maiar&#39;,
+    characters: [
+      {
+        name: &quot;Gandalf&quot;,
+        weapons: [ &quot;Glamdring&quot;, &quot;Wizard Staff&quot;, &quot;Sword&quot; ]
+      },
+      {
+        name: &quot;Radagast&quot;,
+        weapons: [ &quot;Powers of the Maiar&quot;, &quot;Wizard Staff&quot; ]
+      }
+    ]
+  },
+  {
+    race: &#39;Men&#39;,
+    characters: [
+      {
+        name: &quot;Aragorn&quot;,
+        weapons: [ &quot;Anduril&quot;, &quot;Sword&quot; ]
+      },
+      {
+        name: &quot;Faramir&quot;,
+        weapons: [ &quot;Bow&quot;, &quot;Sword&quot; ]
+      }
+    ]
+  },
+  {
+    race: &quot;Ainur&quot;,
+    characters: [
+      {
+        name: &quot;Sauron&quot;,
+        weapons: [ &quot;One Ring&quot;, &quot;Sword&quot;, &quot;Powers of the Maiar&quot; ]
+      }
+    ]
+  }
+];
+</code></pre>
+<p>O que preciso é criar um array com todos os nomes de cada um dos personagens que estão separados por raça.</p>
+<p>Vamos primeiramente fazer assim:</p>
+<pre><code class="lang-javascript">var names = lordOfTheRings
+  .map(function(item){
+    return item.characters
+      .map(function( character ) {
+        return character.name;
+      });
+  });
+
+console.log(names);
+/*
+[ 
+  [ &#39;Galadriel&#39;, &#39;Legolas&#39; ],
+  [ &#39;Gandalf&#39;, &#39;Radagast&#39; ],
+  [ &#39;Aragorn&#39;, &#39;Faramir&#39; ],
+  [ &#39;Sauron&#39; ] 
+]
+*/
+</code></pre>
+<p>Note que temos 4 arrays dentro de um array... então usamos o <code>mergeAll</code>.</p>
+<pre><code class="lang-javascript">var names = lordOfTheRings
+  .map(function(item){
+    return item.characters
+      .map(function( character ) {
+        return character.name;
+      });
+  }).mergeAll();
+
+console.log(names);
+/*
+[ &#39;Galadriel&#39;,
+  &#39;Legolas&#39;,
+  &#39;Gandalf&#39;,
+  &#39;Radagast&#39;,
+  &#39;Aragorn&#39;,
+  &#39;Faramir&#39;,
+  &#39;Sauron&#39; ]
+*/
+</code></pre>
+<p>No final de nosso <strong>map</strong>, chamamos a função <strong>mergeAll</strong>, e agora sim temos um único array :)</p>
+<h2 id="para-que-serve-o-zip-">Para que serve o zip ?</h2>
+<p>Essa função serve para iterar dois arrays ao mesmo tempo, aplicando uma função callback para ambos. Isso é útil quando temos dois arrays que possuem alguma ligação em relação aos seus indíces.</p>
+<h2 id="zip">zip</h2>
+<pre><code class="lang-javascript">Array.zip = function(left, right, callback) {
+  var len = Math.min(left.length, right.length); // pegamos o menor tamanho
+  var results = [];
+  for( var i = 0; i &lt; len; i++ ) {
+    results.push( callback(left[i], right[i]) );
+  }
+  return results;
+};
+</code></pre>
+<p>O que fazemos aqui é receber 3 argumentos, <strong>(1)</strong> o primeiro array, <strong>(2)</strong> o segundo array e <strong>(3)</strong> a função callback que vai iterar um por um dos itens dos array.</p>
+<p>Note que se os arrays forem de tamanhos diferentes, ele irá pegar o tamanho do array menor. E também que essa função não vai no prototype, pois passamos duas referências de objetos/arrays diferentes.</p>
+<h3 id="ligando-dois-arrays">Ligando dois arrays</h3>
+<p>Imagine esse cenário, onde no primeiro array, tenho os personagens e no segundo tenho as armas. O que eu preciso, é um novo objeto que pegue do primeito array apenas o <code>name</code>, e pegue do segundo array apenas a último item de <code>weapons</code>.</p>
+<pre><code class="lang-javascript">var characters = [
+  { name: &quot;Galadriel&quot; },
+  { name: &quot;Legolas&quot; },
+  { name: &quot;Gandalf&quot; },
+  { name: &quot;Radagast&quot; },
+  { name: &quot;Aragorn&quot; },
+  { name: &quot;Faramir&quot; },
+  { name: &quot;Sauron&quot; }
+];
+
+var weapons = [
+  [ &quot;Elven Magic&quot;, &quot;Nenya&quot; ],
+  [ &quot;Bow&quot;, &quot;Knife&quot; ],
+  [ &quot;Glamdring&quot;, &quot;Wizard Staff&quot;, &quot;Sword&quot; ],
+  [ &quot;Powers of the Maiar&quot;, &quot;Wizard Staff&quot; ],
+  [ &quot;Anduril&quot;, &quot;Sword&quot; ],
+  [ &quot;Bow&quot;, &quot;Sword&quot; ],
+  [ &quot;One Ring&quot;, &quot;Sword&quot;, &quot;Powers of the Maiar&quot; ]
+];
+
+var joined = Array.zip( characters, weapons, function( character, weapons ) {
+  return { name: character.name, weapon: weapons.pop() };
+});
+
+console.log(joined);
+
+/*
+[ 
+  { name: &#39;Galadriel&#39;, weapon: &#39;Nenya&#39; },
+  { name: &#39;Legolas&#39;, weapon: &#39;Knife&#39; },
+  { name: &#39;Gandalf&#39;, weapon: &#39;Sword&#39; },
+  { name: &#39;Radagast&#39;, weapon: &#39;Wizard Staff&#39; },
+  { name: &#39;Aragorn&#39;, weapon: &#39;Sword&#39; },
+  { name: &#39;Faramir&#39;, weapon: &#39;Sword&#39; },
+  { name: &#39;Sauron&#39;, weapon: &#39;Powers of the Maiar&#39; } 
+]
+*/
+</code></pre>
+<p>Pronto, agora temos um único objeto.</p>
+<p>Agora que temos todas as funções     que precisamos, <a href="http://expalmer.github.io/criando-seu-proprio-array-foreach-array-map-e-array-filter-em-javascript/">map</a>, <a href="http://expalmer.github.io/criando-seu-proprio-array-foreach-array-map-e-array-filter-em-javascript/">filter</a>, <a href="http://expalmer.github.io/criando-seu-proprio-array-reduce-em-javascript/">reduce</a>, <a href="http://expalmer.github.io/criando-seu-proprio-array-mergeall-e-zip-em-javascript/">mergeAll</a> e <a href="http://expalmer.github.io/criando-seu-proprio-array-mergeall-e-zip-em-javascript/">zip</a>, nos próximos posts veremos como usá-las juntas para criarmos consultas interessantes e super úteis.</p>
+<p>Espero que tenham gostado. That&#39;s it !</p>
+]]>
         </content:encoded>
       </item>
-      
       <item>
         <title><![CDATA[Criando seu próprio Array Reduce em Javascript]]></title>
         <description><![CDATA[Aprendendo programação funcional criando um reduce em javascript.]]></description>
         <link>http://expalmer.github.io/criando-seu-proprio-array-reduce-em-javascript/</link>
         <guid isPermaLink="true">http://expalmer.github.io/criando-seu-proprio-array-reduce-em-javascript/</guid>
-        
         <category><![CDATA[javascript]]></category>
-        
         <dc:creator><![CDATA[Palmer Oliveira]]></dc:creator>
         <pubDate>Mon, 21 Dec 2015 18:00:06 GMT</pubDate>
         <content:encoded>
-          <![CDATA[]]>
+          <![CDATA[<p>Reduce é uma função simples, porém muito poderosa, e se você tiver criatividade poderá fazer coisas incríveis com ela.</p>
+<h2 id="reduce-">Reduce ?</h2>
+<p>É um padrão onde você percorre uma coleção e faz reduções na mesma. Simples assim.</p>
+<p>No reduce você passa uma função que será executada a cada item ( como o <code>map</code> ), mas com o detalhe de que sua função será executada com 4 argumentos:</p>
+<ul>
+<li>1 - <strong>Acumulador</strong>: O 1º item do array, ou um valor inicial (2º parâmetro do reduce)</li>
+<li>2 - <strong>Item Atual</strong>: 2º item ou o 1º se houver valor inicial</li>
+<li>3 - <strong>Indice</strong>: Indice atual</li>
+<li>4 - <strong>Array</strong>: Array inteiro</li>
+</ul>
+<p>Ou seja, na primeira execução de cara você já recebe o primeiro e o segundo item de sua coleção, o que você retornar será o acumulador na próxima chamada. Também é possível passar um segundo argumento no reduce, caso queira um valor inicial, e com isso é possível fazer muitas coisas.</p>
+<p>Para melhor entendimento, dê uma olhada na <a href="https://developer.mozilla.org/pt-BR/docs/Web/JavaScript/Reference/Global_Objects/Array/Reduce">documentação da Mozzila</a>.</p>
+<p>Vamos já criar nosso próprio <code>reduce</code>, e na sequencia já temos alguns exemplos onde ficará mais claro do que estamos falando.</p>
+<h2 id="reduce">reduce</h2>
+<pre><code class="lang-javascript">Array.prototype.reduce = function(callback, initialValue) {
+  var len = this.length;
+  var index = 1; // index começa em 1
+  var accumulatedValue = this[0]; // valor acumulado é o 1o valor
+  // se for passado valor inicial, mudamos as coisas
+  if ( initialValue ) {
+    index = 0; // começa em 0
+    accumulatedValue = initialValue; // acumulado = valor inicial
+  }
+  while(index &lt; len) {
+    accumulatedValue = callback(accumulatedValue, this[index], index, this );
+    index++;
+  }
+  return accumulatedValue;
+};
+</code></pre>
+<h2 id="exemplos-pr-ticos">Exemplos Práticos</h2>
+<p>Vou usar sempre as variáveis com nomes <code>acc</code> de accumulator (acumulador), e <code>curr</code> de currentValue (valor atual ou valor corrente).</p>
+<h3 id="somando">Somando</h3>
+<p>Somamos todos os items de uma array.</p>
+<pre><code class="lang-javascript">var total = [1,2,3,4,5,6,7,8]
+  .reduce(function( acc, curr ) {
+    return acc + curr;
+  });
+
+console.log(total);
+// 36
+</code></pre>
+<h3 id="multiplicando">Multiplicando</h3>
+<p>Multiplicamos todos os items de uma array.</p>
+<pre><code class="lang-javascript">var total = [1,2,3,4]
+  .reduce(function( acc, curr ) {
+    return acc * curr;
+  });
+
+console.log(total);
+// 24
+</code></pre>
+<h3 id="maior-e-menor-valor">Maior e Menor valor</h3>
+<p>Agora algo mais interessante, quem é o maior valor no array?</p>
+<pre><code class="lang-javascript">var maior = [1,2,99,4,5]
+  .reduce(function( acc, curr ) {
+    return acc &gt; curr ? acc : curr;
+  });
+
+console.log(maior);
+// 99
+</code></pre>
+<p>Para verificar o menor valor, troque o operador para <code>&lt;</code>.</p>
+<h3 id="and-e-or">AND e OR</h3>
+<p>Vamos criar uma função <code>AND</code>, que verifica se dentro do array todos os valores são verdadeiros, ou seja, sejam diferentes de <code>&quot;&quot;</code>, <code>0</code>, <code>undefined</code> e <code>false</code>. Perceba que passo um valor inicial para <strong>reduce</strong> contendo <code>true</code>.</p>
+<pre><code class="lang-javascript">var ok = [1,2,3,4,&#39;ola&#39;,true]
+  .reduce(function( acc, curr ) {
+    return !!(acc &amp;&amp; curr);
+  }, true);
+
+console.log(ok);
+// true
+
+var ops = [1,2,3,null,&#39;ola&#39;]
+  .reduce(function( acc, curr ) {
+    return !!(acc &amp;&amp; curr);
+  }, true);
+
+console.log(ops);
+// false. pois tem um null
+</code></pre>
+<p>Vamos criar agora o <code>OR</code>, dessa vez passo o valor inicial de <code>false</code> para fazer a verificação. Se houver qualquer valor verdadeiro no array, retorna <code>true</code>.</p>
+<pre><code class="lang-javascript">var ok = [false,&#39;&#39;,null,&#39;Ola&#39;]
+  .reduce(function( acc, curr ) {
+    return !!(acc || curr);
+  }, false);
+
+console.log(ok);
+// true
+
+var ops = [false,&#39;&#39;,null,&#39;&#39;]
+  .reduce(function( acc, curr ) {
+    return !!(acc || curr);
+  }, false);
+
+console.log(ops);
+// false. pois não tem nenhum valor verdadeiro
+</code></pre>
+<h3 id="inverter-um-array">Inverter um array</h3>
+<p>Claro que você vai preferir usar a função <code>reverse</code>, mas saca só que interessante usar <strong>reduce</strong> para isso.</p>
+<pre><code class="lang-javascript">var rev = [&#39;s&#39;,&#39;t&#39;,&#39;a&#39;,&#39;r&#39;,&#39;&#39;,&#39;w&#39;,&#39;a&#39;,&#39;r&#39;,&#39;s&#39;]
+  .reduce(function( acc, curr, index ) {
+    return [curr].concat(acc);
+  },[]);
+
+console.log(rev);
+// [ &#39;s&#39;, &#39;r&#39;, &#39;a&#39;, &#39;w&#39;, &#39;&#39;, &#39;r&#39;, &#39;a&#39;, &#39;t&#39;, &#39;s&#39; ]
+</code></pre>
+<p>Mas eu te digo, você vai precisar fazer algo do tipo um dia!</p>
+<h3 id="inverter-um-array-com-condi-o">Inverter um array com condição</h3>
+<p>O que acha de inverter o array, mas somente os items que forem consoantes?</p>
+<pre><code class="lang-javascript">
+var cons = [&#39;s&#39;,&#39;t&#39;,&#39;a&#39;,&#39;r&#39;,&#39;&#39;,&#39;w&#39;,&#39;a&#39;,&#39;r&#39;,&#39;s&#39;]
+  .reduce(function( acc, curr, index ) {
+    return curr.match(/[^aeiou]/) ? [curr].concat(acc) : acc;
+  },[]);
+
+console.log(cons);
+// [ &#39;s&#39;, &#39;r&#39;, &#39;w&#39;, &#39;r&#39;, &#39;t&#39;, &#39;s&#39; ]
+</code></pre>
+<h3 id="exemplo-com-objetos">Exemplo com objetos</h3>
+<p>Vamos usar nossos dados <strong>lordOfTheRings</strong> para fazer mais alguns exemplos.</p>
+<pre><code class="lang-javascript">var lordOfTheRings = [
+  { name: &quot;Galadriel&quot;, race: &quot;Elves&quot;, weapons: [ &quot;Elven Magic&quot;, &quot;Nenya&quot; ] },
+  { name: &quot;Legolas&quot;,   race: &quot;Elves&quot;, weapons: [ &quot;Bow&quot;, &quot;Knife&quot; ] },
+  { name: &quot;Gandalf&quot;,   race: &quot;Maiar&quot;, weapons: [ &quot;Glamdring&quot;, &quot;Wizard Staff&quot;, &quot;Sword&quot; ] },
+  { name: &quot;Radagast&quot;,  race: &quot;Maiar&quot;, weapons: [ &quot;Powers of the Maiar&quot;, &quot;Wizard Staff&quot; ] },
+  { name: &quot;Aragorn&quot;,   race: &quot;Men&quot;,   weapons: [ &quot;Anduril&quot;, &quot;Sword&quot; ] },
+  { name: &quot;Sauron&quot;,    race: &quot;Ainur&quot;, weapons: [ &quot;One Ring&quot;, &quot;Sword&quot;, &quot;Powers of the Maiar&quot; ] },
+  { name: &quot;Faramir&quot;,   race: &quot;Men&quot;,   weapons: [ &quot;Bow&quot;, &quot;Sword&quot; ] }
+];
+</code></pre>
+<h3 id="maior-n-mero-de-caracteres-nas-weapons">Maior número de caracteres nas Weapons</h3>
+<p>Eu quero que retorne apenas o nome de quem tem o maior número de caracteres em suas <strong>weapons</strong>, olha que interessante:</p>
+<pre><code class="lang-javascript">var name = lordOfTheRings
+  .reduce(function( a, b, index, array) {
+    var acc = a.weapons.join(&#39;&#39;).length &gt; b.weapons.join(&#39;&#39;).length ? a : b;
+    if( array.length -1 === index ) {
+      acc = acc.name;
+    }
+    return acc;
+  })
+
+console.log(name);
+// Sauron
+</code></pre>
+<p>Note que faço um <strong>if</strong> para verificar o último item do laço, para transformá-lo em uma única string.</p>
+<h3 id="agrupar-por-ra-a">Agrupar por raça</h3>
+<p>Agora um exemplo mais complexo, onde quero agrupar os nomes por raça:</p>
+<pre><code class="lang-javascript">var lordOfTheRings = [
+  { name: &quot;Galadriel&quot;, race: &quot;Elves&quot;, weapons: [ &quot;Elven Magic&quot;, &quot;Nenya&quot; ] },
+  { name: &quot;Legolas&quot;,   race: &quot;Elves&quot;, weapons: [ &quot;Bow&quot;, &quot;Knife&quot; ] },
+  { name: &quot;Gandalf&quot;,   race: &quot;Maiar&quot;, weapons: [ &quot;Glamdring&quot;, &quot;Wizard Staff&quot;, &quot;Sword&quot; ] },
+  { name: &quot;Radagast&quot;,  race: &quot;Maiar&quot;, weapons: [ &quot;Powers of the Maiar&quot;, &quot;Wizard Staff&quot; ] },
+  { name: &quot;Aragorn&quot;,   race: &quot;Men&quot;,   weapons: [ &quot;Anduril&quot;, &quot;Sword&quot; ] },
+  { name: &quot;Sauron&quot;,    race: &quot;Ainur&quot;, weapons: [ &quot;One Ring&quot;, &quot;Sword&quot;, &quot;Powers of the Maiar&quot; ] },
+  { name: &quot;Faramir&quot;,   race: &quot;Men&quot;,   weapons: [ &quot;Bow&quot;, &quot;Sword&quot; ] }
+];
+var byRace = lordOfTheRings
+  .reduce(function( acc, curr) {
+    acc[curr.race] = acc[curr.race] || [];
+    acc[curr.race].push(curr.name);
+    return acc;
+  },{});
+
+console.log(byRace);
+/*
+{
+ Elves: [ &#39;Galadriel&#39;, &#39;Legolas&#39; ],
+ Maiar: [ &#39;Gandalf&#39;, &#39;Radagast&#39; ],
+ Men: [ &#39;Aragorn&#39;, &#39;Faramir&#39; ],
+ Ainur: [ &#39;Sauron&#39; ]
+}
+*/
+</code></pre>
+<h2 id="implementa-es">Implementações</h2>
+<p>Reduce é sem dúvida uma das funções que mais gosto de usar, pois com ela podemos fazer muitas coisas, inclusive implementar nossas funções arrays:</p>
+<h3 id="foreach">forEach</h3>
+<pre><code class="lang-javascript">Array.prototype.forEach = function(callback) {
+  return this.reduce( function( acc, x ) {
+    callback(x);
+    return x;
+  },null);
+};
+</code></pre>
+<h3 id="map">map</h3>
+<pre><code class="lang-javascript">Array.prototype.map = function( callback ) {
+ return this.reduce( function( acc, x ) {
+    return acc.concat( callback(x) );
+  },[]);
+};
+</code></pre>
+<h3 id="filter">filter</h3>
+<pre><code class="lang-javascript">Array.prototype.filter = function(callback) {
+  return this.reduce( function( acc, x ) {
+    return callback(x) ? acc.concat( x ) : acc;
+  },[]);
+};
+</code></pre>
+<h2 id="concluindo">Concluindo</h2>
+<p>Eu particularmente tenho usado reduce em vários projetos, pode até não parecer, mas você pode usar reduce em praticamente tudo.</p>
+<p>Aprendemos mais uma função útil, logo iremos usar todas elas juntas, encadeando funções onde a coisa se torna super interessante.</p>
+<p>No próximo post vamos implementar o <strong>mergeAll</strong> e ver para que ele serve.</p>
+<p>Espero que tenham gostado. That&#39;s it !</p>
+]]>
         </content:encoded>
       </item>
-      
       <item>
         <title><![CDATA[Criando seu próprio Array Foreach, Array Map e Array Filter em Javascript]]></title>
         <description><![CDATA[Aprendendo programação funcional fazendo um foreach, map e filter em javascript.]]></description>
         <link>http://expalmer.github.io/criando-seu-proprio-array-foreach-array-map-e-array-filter-em-javascript/</link>
         <guid isPermaLink="true">http://expalmer.github.io/criando-seu-proprio-array-foreach-array-map-e-array-filter-em-javascript/</guid>
-        
         <category><![CDATA[javascript]]></category>
-        
         <dc:creator><![CDATA[Palmer Oliveira]]></dc:creator>
         <pubDate>Tue, 11 Aug 2015 05:13:06 GMT</pubDate>
         <content:encoded>
-          <![CDATA[]]>
+          <![CDATA[<p>Vou postar uma série de <strong>Criando seu próprio alguma coisa</strong> em javascript para deixar registrado meus estudos e espero que sirva de ajuda para você.</p>
+<h2 id="estudando-programa-o-funcional-em-javascript">Estudando Programação Funcional em Javascript</h2>
+<p>Javascript é uma linguagem considerada <strong>Híbrida</strong>, pois é possível aplicar paradigmas de programação tais como <a href="https://pt.wikipedia.org/wiki/Programa%C3%A7%C3%A3o_imperativa">Imperativa</a>, <a href="https://pt.wikipedia.org/wiki/Programa%C3%A7%C3%A3o_declarativa">Declarativa</a> e <a href="https://pt.wikipedia.org/wiki/Programa%C3%A7%C3%A3o_funcional">Funcional</a>.</p>
+<p>No caso tenho estudado <strong>Programação Funcional</strong> e com isso aprendi que dominando funções como <code>map</code>, <code>filter</code>, <code>reduce</code>, <code>mergeAll</code> e <code>zip</code>, fará você ter super poderes.</p>
+<p>Nas palavras de <a href="https://github.com/jhusain">Jafar Husain</a> da NetFlix: <em>&quot;Se você aprender essas 5 funções, seu código vai se tornar menor, mais auto descritivo e mais durável&quot;</em>.</p>
+<p>Vamos começar a aprender esses truques. Neste posts vamos ver <strong>map</strong> e <strong>filter</strong>, mas vou incluir o <strong>forEach</strong> antes de tudo:</p>
+<h3 id="considere-esse-array-de-objetos">Considere esse array de objetos</h3>
+<pre><code class="lang-javascript">var lordOfTheRings = [
+  { name: &quot;Galadriel&quot;, race: &quot;Elves&quot;, weapons: [ &quot;Elven Magic&quot;, &quot;Nenya&quot; ] },
+  { name: &quot;Legolas&quot;,   race: &quot;Elves&quot;, weapons: [ &quot;Bow&quot;, &quot;Knife&quot; ] },
+  { name: &quot;Gandalf&quot;,   race: &quot;Maiar&quot;, weapons: [ &quot;Glamdring&quot;, &quot;Wizard Staff&quot;, &quot;Sword&quot; ] },
+  { name: &quot;Radagast&quot;,  race: &quot;Maiar&quot;, weapons: [ &quot;Powers of the Maiar&quot;, &quot;Wizard Staff&quot; ] },
+  { name: &quot;Aragorn&quot;,   race: &quot;Men&quot;,   weapons: [ &quot;Anduril&quot;, &quot;Sword&quot; ] },
+  { name: &quot;Sauron&quot;,    race: &quot;Ainur&quot;, weapons: [ &quot;One Ring&quot;, &quot;Sword&quot;, &quot;Powers of the Maiar&quot; ] },
+  { name: &quot;Faramir&quot;,   race: &quot;Men&quot;,   weapons: [ &quot;Bow&quot;, &quot;Sword&quot; ] }
+];
+</code></pre>
+<p>Você precisa mostrar apenas o <strong>name</strong> e a <strong>race</strong> de cada personagem, então vamos usar um <code>for</code>.</p>
+<pre><code class="lang-javascript">var results = [];
+var len = lordOfTheRings.length;
+for (var i = 0; i &lt; len; i++) {
+  results.push( { name: lordOfTheRings[i].name, race: lordOfTheRings[i].race } );
+}
+console.log( results );
+/*
+[ { name: &#39;Galadriel&#39;, race: &#39;Elves&#39; },
+  { name: &#39;Legolas&#39;, race: &#39;Elves&#39; },
+  { name: &#39;Gandalf&#39;, race: &#39;Maiar&#39; },
+  { name: &#39;Radagast&#39;, race: &#39;Maiar&#39; },
+  { name: &#39;Aragorn&#39;, race: &#39;Men&#39; },
+  { name: &#39;Sauron&#39;, race: &#39;Ainur&#39; },
+  { name: &#39;Faramir&#39;, race: &#39;Men&#39; } ]
+*/
+</code></pre>
+<p>Vamos implementar nosso próprio <code>forEach</code>.</p>
+<h2 id="foreach">forEach</h2>
+<pre><code class="lang-javascript">// https://developer.mozilla.org/pt-BR/docs/Web/JavaScript/Reference/Global_Objects/Array/forEach
+// Para cada item do array é chamado o callback com 3 argumentos
+// 1: O this[ i ], 2: o index atual, 3: o array inteiro
+Array.prototype.forEach = function ( callback ) {
+  var len = this.length; // tamanho do nosso array
+  for( var i = 0; i &lt; len; i++ ) {
+    callback( this[i], i, this );
+  }
+};
+</code></pre>
+<p><strong>OBS:</strong> Falar sobre <code>prototype</code> é coisa para outro post, embora tenham muitos outros posts pela internet explicando. Mas vamos a parte que nos interessa. Quando colocamos no prototype do objeto <strong>Array</strong> a função <strong>forEach</strong>, isso fará com que todos arrays tenham acesso a essa função. Note que o <strong>this</strong> é o próprio array.</p>
+<p>Vamos usar nossa implementação.</p>
+<pre><code class="lang-javascript">var results = [];
+lordOfTheRings.forEach( function( item ) {
+  results.push( { name: item.name, race: item.race } );
+});
+console.log( results );
+
+/*
+[ { name: &#39;Galadriel&#39;, race: &#39;Elves&#39; },
+  { name: &#39;Legolas&#39;, race: &#39;Elves&#39; },
+  { name: &#39;Gandalf&#39;, race: &#39;Maiar&#39; },
+  { name: &#39;Radagast&#39;, race: &#39;Maiar&#39; },
+  { name: &#39;Aragorn&#39;, race: &#39;Men&#39; },
+  { name: &#39;Sauron&#39;, race: &#39;Ainur&#39; },
+  { name: &#39;Faramir&#39;, race: &#39;Men&#39; } ]
+*/
+
+// Só para você testar usando as chaves ;)
+lordOfTheRings.forEach( function( item, index ) {
+  console.log( index, item.name  );
+});
+/*
+  0 &#39;=&gt;&#39; &#39;Galadriel&#39;
+  1 &#39;=&gt;&#39; &#39;Legolas&#39;
+  2 &#39;=&gt;&#39; &#39;Gandalf&#39;
+  3 &#39;=&gt;&#39; &#39;Radagast&#39;
+  4 &#39;=&gt;&#39; &#39;Aragorn&#39;
+  5 &#39;=&gt;&#39; &#39;Sauron&#39;
+  6 &#39;=&gt;&#39; &#39;Faramir&#39;
+*/
+</code></pre>
+<p>Olha aí cara!! Você mesmo implementou seu próprio forEach, vamos adiante!</p>
+<p>Imagine que agora você precise de um novo array de objetos apenas contendo  <strong>name</strong> e <strong>weapons</strong>.
+Com <strong>forEach</strong> faríamos assim:</p>
+<pre><code class="lang-javascript"> var result = [];
+ lordOfTheRings.forEach( function( item ) {
+    result.push( { name: item.name, weapons: item.weapons } );
+ });
+ console.log(result);
+/*
+[ { name: &#39;Galadriel&#39;, weapons: [ &#39;Elven Magic&#39;, &#39;Nenya&#39; ] },
+  { name: &#39;Legolas&#39;, weapons: [ &#39;Bow&#39;, &#39;Knife&#39; ] },
+  { name: &#39;Gandalf&#39;, weapons: [ &#39;Glamdring&#39;, &#39;Wizard Staff&#39;, &#39;Sword&#39; ] },
+  { name: &#39;Radagast&#39;, weapons: [ &#39;Powers of the Maiar&#39;, &#39;Wizard Staff&#39; ] },
+  { name: &#39;Aragorn&#39;, weapons: [ &#39;Anduril&#39;, &#39;Sword&#39; ] },
+  { name: &#39;Sauron&#39;, weapons: [ &#39;One Ring&#39;, &#39;Sword&#39;, &#39;Powers of the Maiar&#39; ] },
+  { name: &#39;Faramir&#39;, weapons: [ &#39;Bow&#39;, &#39;Sword&#39; ] } ]
+*/
+</code></pre>
+<h2 id="map">map</h2>
+<p>Agora sim, vamos criar nosso array <strong>map</strong>, que irá retornar um novo array conforme nossa necessidade. Essa função é extremamente útil, pois com ela futuramente você verá como podemos encadear funções.</p>
+<pre><code class="lang-javascript">// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map
+// Mesmo coisa que o forEach, mas guardamos os dados para retornar após o &quot;for&quot;
+Array.prototype.map = function( callback ) {
+  var results = [];
+  var len = this.length;
+  for( var i = 0; i &lt; len; i++ ) {
+    results.push( callback( this[i], i, this ) );
+  }
+  return results; // &lt;= retornamos aqui
+}
+</code></pre>
+<p>Agora usando nosso <strong>map</strong>.</p>
+<pre><code class="lang-javascript">var result = lordOfTheRings.map( function ( item ) {
+  return { name: item.name, weapons: item.weapons };
+});
+console.log( result );
+/*
+[ { name: &#39;Galadriel&#39;, weapons: [ &#39;Elven Magic&#39;, &#39;Nenya&#39; ] },
+  { name: &#39;Legolas&#39;, weapons: [ &#39;Bow&#39;, &#39;Knife&#39; ] },
+  { name: &#39;Gandalf&#39;, weapons: [ &#39;Glamdring&#39;, &#39;Wizard Staff&#39;, &#39;Sword&#39; ] },
+  { name: &#39;Radagast&#39;, weapons: [ &#39;Powers of the Maiar&#39;, &#39;Wizard Staff&#39; ] },
+  { name: &#39;Aragorn&#39;, weapons: [ &#39;Anduril&#39;, &#39;Sword&#39; ] },
+  { name: &#39;Sauron&#39;, weapons: [ &#39;One Ring&#39;, &#39;Sword&#39;, &#39;Powers of the Maiar&#39; ] },
+  { name: &#39;Faramir&#39;, weapons: [ &#39;Bow&#39;, &#39;Sword&#39; ] } ]
+*/
+</code></pre>
+<p>Até aqui tudo bem ? Viu que o <strong>map</strong> retorna um novo array! Seguindo em frente vamos para exemplos mais interessantes.</p>
+<p>Agora queremos listar apenas os <strong>Elfos</strong>!
+Para isso teremos que usar um <strong>forEach</strong>, fazer um <strong>if</strong> e guardar os resultados que queremos:</p>
+<pre><code class="lang-javascript">var elfos = [];
+lordOfTheRings.forEach( function ( item ) {
+  if( item.race === &quot;Elves&quot; ) {
+    elfos.push( { name: item.name, race: item.race } );
+  }
+});
+console.log( elfos );
+/*
+  [ { name: &#39;Galadriel&#39;, race: &#39;Elves&#39; },
+    { name: &#39;Legolas&#39;, race: &#39;Elves&#39; } ]
+*/
+</code></pre>
+<p>Vamos criar nossa função <strong>filter</strong>, ela será responsável de filtrar os dados que desejamos. O que ela faz é percorrer cada item do array e se o retorno for <strong>verdadeiro</strong> o item é acumulado.</p>
+<h2 id="filter">filter</h2>
+<pre><code class="lang-javascript">//https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter
+Array.prototype.filter = function ( callback ) {
+  var results = [];
+  var len = this.length;
+  for( var i = 0; i &lt; len; i++ ) {
+    if ( callback( this[i] ) ) { // se for verdadeiro é acumulado
+      results.push( this[i] );
+    }
+  }
+  return results;
+};
+</code></pre>
+<p>Aqui já entramos nas utilidades de encadear funções, vamos refazer nosso exemplo com <strong>filter</strong> e <strong>map</strong>.</p>
+<pre><code class="lang-javascript">var elfos = lordOfTheRings
+              .filter( function ( item ) {
+                return item.race === &quot;Elves&quot;;
+              })
+              .map( function( elfos ) {
+                return { name: elfos.name, race: elfos.race };
+              });
+console.log( elfos );
+
+/*
+  [ { name: &#39;Galadriel&#39;, race: &#39;Elves&#39; },
+    { name: &#39;Legolas&#39;, race: &#39;Elves&#39; } ]
+*/
+</code></pre>
+<p>Vamos fazer mais uns testezinhos com <strong>map</strong> e <strong>filter</strong> para fixar bem na mente.</p>
+<pre><code class="lang-javascript">var numbers = [ 1,2,3,4,5,6,7,8,9 ];
+// mostrandos só os numeros pares
+var even = numbers.filter( function( n ) {
+  return n % 2 === 0; //
+});
+console.log(even);
+/*
+  [ 2, 4, 6, 8 ]
+*/
+
+// pegue os numeros impares e multiplique por 10
+var odd = numbers
+            .filter( function( n ) {
+              return n % 2; //
+            })
+            .map( function( n ) {
+              return n * 100;
+            })
+console.log(odd);
+/*
+  [ 100, 300, 500, 700, 900 ]
+*/
+</code></pre>
+<p>Até aqui já dá para perceber a variedade de coisas que podemos fazer apenas com <code>map</code> e <code>filter</code>. E o melhor de tudo é que você mesmo criou cada uma dessas funções :).</p>
+<h2 id="finalizando">Finalizando</h2>
+<p>Para finalizar, vamos fazer mais um exemplo, e logo abaixo coloco 2 desafios para você.</p>
+<pre><code class="lang-javascript">// Só quero quem é Maiar ou Men, e a quantidade total de weapons de cada um.
+// Retorne um array de objetos somente com as chaves {name},{totalWeapons}
+var result =  lordOfTheRings
+                .filter( function( item ) {
+                  return item.race === &quot;Maiar&quot; || item.race === &quot;Men&quot;;
+                })
+                .map( function( item ) {
+                  return { name: item.name, totalWeapons: item.weapons.length };
+                });
+console.log(result);
+
+/*
+  [ { name: &#39;Gandalf&#39;, totalWeapons: 3 },
+    { name: &#39;Radagast&#39;, totalWeapons: 2 },
+    { name: &#39;Aragorn&#39;, totalWeapons: 2 },
+    { name: &#39;Faramir&#39;, totalWeapons: 2 } ]
+*/
+</code></pre>
+<h2 id="desafio-1">Desafio 1</h2>
+<p>Me retorne todos ( menos o Sauron ) que possuam a quantidade total de armas maior que 2.</p>
+<p>O array de objetos deve ser neste formato:</p>
+<pre><code class="lang-javascript">/*
+  [ { name: &#39;Name&#39;, totalWeapons: 0 }  ]
+*/
+</code></pre>
+<h2 id="desafio-2">Desafio 2</h2>
+<p>Me retorne somente aqueles que possuam mais de 2 armas e entre elas deve conter uma &quot;Sword&quot;.</p>
+<p>Só use <code>map</code> e <code>filter</code>, não pode usar <code>if</code>.</p>
+<p>O array de objetos deve ser neste formato:</p>
+<pre><code class="lang-javascript">/*
+  [ { name: &#39;Name&#39;, race: &quot;Race&quot;, totalWeapons: 0 } ]
+*/
+</code></pre>
+<p>Poste nos comentários as soluções dos desafios.</p>
+<p>No próximo post vamos implementar o <strong>reduce</strong>.</p>
+<p>Espero que tenham gostado. That&#39;s it !</p>
+]]>
         </content:encoded>
       </item>
-      
       <item>
         <title><![CDATA[Paginando nosso blog estático em Metalsmith]]></title>
         <description><![CDATA[Agora vamos paginar nosso blog feito em Metalsmith.]]></description>
-        <link>http://expalmer.github.io/paginando-nosso-blog-est-tico-em-metalsmith/</link>
-        <guid isPermaLink="true">http://expalmer.github.io/paginando-nosso-blog-est-tico-em-metalsmith/</guid>
-        
+        <link>http://expalmer.github.io/paginando-nosso-blog-estatico-em-metalsmith/</link>
+        <guid isPermaLink="true">http://expalmer.github.io/paginando-nosso-blog-estatico-em-metalsmith/</guid>
         <category><![CDATA[metalsmith]]></category>
-        
         <category><![CDATA[javascript]]></category>
-        
         <category><![CDATA[nodejs]]></category>
-        
         <dc:creator><![CDATA[Palmer Oliveira]]></dc:creator>
         <pubDate>Mon, 02 Mar 2015 16:39:06 GMT</pubDate>
         <content:encoded>
-          <![CDATA[]]>
+          <![CDATA[<p>Vamos adicionar agora uma <code>paginação</code> para nosso blog feito com <a href="http://metalsmith.io/">Metalsmith</a>.</p>
+<p>Vamos usar os mesmos arquivos do post anterior, <a href="http://expalmer.github.io/criando-um-blog-estatico-com-metalsmith-contendo-tags-gists-drafts-e-um-rss-feed/">esses aqui</a>, portanto vou postar apenas os arquivos novos ou que sofreram alteração.</p>
+<h3 id="1-instale-a-nova-depend-ncia-metalsmith-pagination-">1) Instale a nova dependência <code>metalsmith-pagination</code>.</h3>
+<pre><code class="lang-javascript">$ npm install metalsmith-pagination --save
+</code></pre>
+<p>Esse <code>save</code> no final é para incluir automaticamente no nosso arquivo <code>package.json</code> nossa dependência.</p>
+<h3 id="2-alterando-o-index-js-">2) Alterando o <code>index.js</code>.</h3>
+<pre><code class="lang-javascript">var Metalsmith   = require(&#39;metalsmith&#39;);
+var collections  = require(&#39;metalsmith-collections&#39;);
+var markdown     = require(&#39;metalsmith-markdown&#39;);
+var templates    = require(&#39;metalsmith-templates&#39;);
+var permalinks   = require(&#39;metalsmith-permalinks&#39;);
+var tags         = require(&#39;metalsmith-tags&#39;);
+var gist         = require(&#39;metalsmith-gist&#39;);
+var drafts       = require(&#39;metalsmith-drafts&#39;);
+var pagination   = require(&#39;metalsmith-pagination&#39;); // &lt;-- nova dependência
+
+var fs           = require(&#39;fs&#39;);
+var Handlebars   = require(&#39;handlebars&#39;);
+var moment       = require(&#39;moment&#39;);
+
+Handlebars.registerPartial({
+  &#39;header&#39;: fs.readFileSync(&#39;./templates/partials/header.hbt&#39;).toString(),
+  &#39;footer&#39;: fs.readFileSync(&#39;./templates/partials/footer.hbt&#39;).toString()
+});
+Handlebars.registerHelper(&#39;dateFormat&#39;, function( context ) {
+  return moment(context).format(&quot;LL&quot;);
+});
+Handlebars.registerHelper(&#39;dateGMT&#39;, function( context ) {
+  context = context === &#39;new&#39; ? new Date() : context;
+  return context.toGMTString();
+});
+// helpers para marcar a página corrente
+Handlebars.registerHelper(&#39;currentPage&#39;, function( current, page ) {
+  return current === page ? &#39;current&#39; : &#39;&#39;;
+});
+
+Metalsmith(__dirname)
+  .use(drafts())
+  .use(collections({
+      posts: {
+          pattern: &#39;posts/*.md&#39;,
+          sortBy: &#39;date&#39;,
+          reverse: true
+      }
+  }))
+  .use(markdown())
+  .use(permalinks({
+      pattern: &#39;:title&#39;,
+      relative: false
+  }))
+  // detalhe: o pagination usa o ``collection`` e por isso deve ser chamado após o mesmo.
+  // outro detalhe: nós estamos usando também o ``permalinks`` que altera o nome das páginas,
+  //                portanto precisamos declarar o pagination após ele também.
+  .use(pagination({
+    &#39;collections.posts&#39;: {  // aqui vai o nome da collection, no nosso caso, collections.posts
+      perPage: 2, // por página
+      template: &#39;indexWithPagination.hbt&#39;, // o template
+      first: &#39;index.html&#39;, // ele cria um index.html na raiz com a primeira página
+      path: &#39;:num/index.html&#39; // modelo de como quer que sejam criadas as demais páginas
+    }
+  }))
+  .use(gist())
+  .use(tags({
+    handle: &#39;tags&#39;,
+    template:&#39;tags.hbt&#39;,
+    path:&#39;tags&#39;,
+    sortBy: &#39;title&#39;,
+    reverse: true
+  }))
+  .use(templates(&#39;handlebars&#39;))
+  .destination(&#39;./build&#39;)
+  .build(function(err, files) {
+    if (err) { throw err; }
+  });
+</code></pre>
+<p>Note que no arquivo <code>index.js</code> criamos um <strong>handlebars helper</strong> chamado <code>currentPage</code>, ele será usado para colocar uma classe css na página corrente.</p>
+<h3 id="3-alterando-o-src-index-md-">3 ) Alterando o <code>src/index.md</code>.</h3>
+<pre><code class="lang-javascript">---
+template: indexWithPagination.hbt
+---
+
+Bem vindo ao meu blog! Confira abaixo meus **posts**.
+</code></pre>
+<h3 id="4-novo-template-template-indexwithpagination-hbt-">4 ) Novo template <code>template/indexWithPagination.hbt</code>.</h3>
+<p>Esse template será usado no lugar do <code>template/index.hbt</code>, pois agora teremos que fazer o <strong>each</strong> no novo objeto criado pelo <strong>metalsmith-pagination</strong> chamado <code>pagination</code>.</p>
+<pre><code class="lang-markup">{{&gt; header}}
+  &lt;section&gt;
+    &lt;h1&gt;Lista dos Posts Paginados&lt;/h1&gt;
+    &lt;h3&gt;Estamos na Página ({{pagination.num}})&lt;/h3&gt;
+    &lt;ul&gt;
+    {{#each pagination.files}}
+      &lt;li&gt;
+        &lt;a href=&quot;/{{this.path}}/index.html&quot; title=&quot;{{this.title}}&quot;&gt;
+          &lt;h2&gt;{{this.title}}&lt;/h2&gt;
+          &lt;time datetime=&quot;{{ dateFormat this.date }}&quot;&gt;{{ dateFormat this.date }}&lt;/time&gt;
+        &lt;/a&gt;
+      &lt;/li&gt;
+    {{/each}}
+    &lt;/ul&gt;
+    &lt;ul class=&quot;pagination&quot;&gt;
+      {{#if pagination.previous}}
+        &lt;li&gt;&lt;a href=&quot;/{{pagination.previous.path}}&quot;&gt;Prev&lt;/a&gt;&lt;/li&gt;
+      {{else}}
+        &lt;li class=&quot;inactive&quot;&gt;&lt;span&gt;Prev&lt;/span&gt;&lt;/li&gt;
+      {{/if}}
+      {{#each pagination.pages}}
+        &lt;li class=&quot;{{currentPage ../pagination.num this.pagination.num}}&quot;&gt;&lt;a href=&quot;/{{this.path}}&quot;&gt;{{this.pagination.num}}&lt;/a&gt;&lt;/li&gt;
+      {{/each}}
+      {{#if pagination.next}}
+        &lt;li&gt;&lt;a href=&quot;/{{pagination.next.path}}&quot;&gt;Next&lt;/a&gt;&lt;/li&gt;
+      {{else}}
+        &lt;li class=&quot;inactive&quot;&gt;&lt;span&gt;Next&lt;/span&gt;&lt;/li&gt;
+      {{/if}}
+    &lt;/ul&gt;
+  &lt;/section&gt;
+{{&gt; footer}}
+</code></pre>
+<p>Vamos encher nosso blog com mais 2 posts, para ficar melhor a visualização da nossa paginação.</p>
+<h3 id="5-novo-post-src-posts-post-5-md-">5 ) Novo Post <code>src/posts/post-5.md</code>.</h3>
+<pre><code class="lang-javascript">---
+title: Quinto post sobre produtividade no trabalho
+template: posts.hbt
+date: 2015-02-20
+description: Como ser mais produtivo no trabalho
+author: Palmer. Para o RSS Feed.
+tags: produtividade
+---
+
+## Quinto post sobre produtividade no trabalho
+
+- Lorem ipsum dolor.
+- Lorem ipsum dolor sit.
+
+Lorem ipsum dolor sit amet, consectetur adipisicing elit. Placeat amet, sapiente rem dolorum vitae aliquid illo ducimus laboriosam, quas molestiae quaerat corporis laborum! Ducimus asperiores nesciunt vel, nam sequi quasi! Similique explicabo, temporibus tenetur maxime iusto odit facere illo eligendi corrupti, consequatur soluta in itaque commodi id inventore. Rerum reiciendis necessitatibus, quaerat atque saepe, illum enim suscipit libero numquam maxime ad tempore. Dignissimos, delectus, ipsa. Mollitia veritatis vitae expedita iste hic praesentium numquam molestias quibusdam ad sed quia libero ipsum porro, cupiditate nisi. Nobis aspernatur id doloremque mollitia inventore delectus nesciunt vitae molestias. Deleniti, blanditiis, itaque. Odit voluptatem alias corporis.
+</code></pre>
+<h3 id="6-novo-post-src-posts-post-6-md-">6 ) Novo Post <code>src/posts/post-6.md</code>.</h3>
+<pre><code class="lang-javascript">---
+title: Fazer ou não fazer uma faculdade
+template: posts.hbt
+date: 2015-03-02
+description: Será que hoje para um desenvolvedor é necessário o canudo ?
+author: Palmer. Para o RSS Feed.
+tags: faculdade, profissao
+---
+
+## Fazer ou não fazer uma faculdade
+
+Lorem ``ipsum`` dolor sit amet, consectetur adipisicing elit. Eaque, at corporis recusandae eius magnam ducimus explicabo reiciendis. **Et eligendi** illo soluta laboriosam nulla, tempore, non, praesentium nobis sit facere fuga?
+</code></pre>
+<h3 id="7-adicione-no-final-do-src-css-style-css-">7 ) Adicione no final do <code>src/css/style.css</code>.</h3>
+<pre><code class="lang-css">pre {
+  padding: 20px;
+  background: #313430;
+  color: #D42EA4;
+  border-radius: 4px;
+}
+.pagination {
+  margin: 0;
+  padding: 0;
+}
+.pagination li {
+  display: inline-block;
+}
+.pagination li a,
+.pagination li span {
+  display: block;
+  padding: 4px 8px;
+  border: solid 1px #eee;
+  color: #111;
+  font-size: 0.9em;
+  text-decoration: none;
+}
+.pagination .current a {
+  color: #fff;
+  background: #FF0050;
+}
+.pagination .inactive span {
+  cursor: not-allowed;
+  color: #bbb;
+  background: #eee;
+}
+</code></pre>
+<h3 id="8-finalmente-execute-o-comando-na-raiz-do-diret-rio-">8) Finalmente execute o comando na raiz do diretório:</h3>
+<pre><code class="lang-javascript">$ node index.js
+</code></pre>
+<p>Note que agora no diretório <code>build</code>, teremos novos arquivos em <code>1/index.html, 2/index.html 3/index.html</code>.</p>
+<p>Isso porque temos <code>6</code> posts, e configuramos para <code>2</code> posts por página, ficando então 3 páginas.</p>
+<p>Se está usando o <strong>httpster</strong> então vá no diretório <code>build</code> e dê o comando <code>httpster</code>, então abra o browser em <code>http://localhost:3333/</code>.</p>
+<p>Coloquei no git o exemplo e os arquivos se quiser dar uma olhada: <a href="https://github.com/expalmer/blog-example-with-metalsmith">blog-example-with-metalsmith</a></p>
+<p>Bom acho que ficou claro, mas caso tenha dúvida é só me perguntar.</p>
+<p>Espero que tenham gostado. That&#39;s it !</p>
+]]>
         </content:encoded>
       </item>
-      
       <item>
         <title><![CDATA[Criando um Rest com Slim Framework em poucos minutos - parte 2]]></title>
         <description><![CDATA[Usando Slim Framework juntamente com o Twig Template, Illuminate Database e Validate.]]></description>
         <link>http://expalmer.github.io/criando-um-rest-com-slim-framework-e-illuminate-database-em-poucos-minutos-parte-2/</link>
         <guid isPermaLink="true">http://expalmer.github.io/criando-um-rest-com-slim-framework-e-illuminate-database-em-poucos-minutos-parte-2/</guid>
-        
         <category><![CDATA[php]]></category>
-        
         <category><![CDATA[slimframework]]></category>
-        
         <dc:creator><![CDATA[Palmer Oliveira]]></dc:creator>
         <pubDate>Sun, 22 Feb 2015 14:00:36 GMT</pubDate>
         <content:encoded>
-          <![CDATA[]]>
+          <![CDATA[<p>No post passado vimos como iniciar um rest com o <a href="http://slimframework.com/">Slim Framework</a>, mas neste post resolvi mudar a abordagem, vamos fazer um <code>CRUD</code> usando o <a href="http://twig.sensiolabs.org/">Twig Template</a>, <a href="https://github.com/illuminate/database">Illuminate Database</a>, <a href="https://github.com/illuminate/validation">Illuminate Validation</a>. Juntos eles formam um bom time!</p>
+<p>Vou postar todo código de novo, pois fiz umas modificações na organização dos arquivos, removi, alterei e inclui novos arquivos, e acredito que ficou bem mais organizado. Retirei a parte do REST por enquanto, deixarei apenas o CRUD, mas logo farei novamente o REST para ser consumido pela nossa aplicação no <code>client side</code> por uma lib javascript.</p>
+<h3 id="1-os-dados-do-banco-mysql-use-o-mesmo-que-usamos-no-post-passado-">1) Os dados do banco MySql, use o mesmo que usamos no post passado!</h3>
+<h3 id="2-estrutura-de-arquivos-do-app">2 ) Estrutura de arquivos do APP</h3>
+<pre><code class="lang-javascript">
+slim-rest
+├── app
+│   ├── config
+│   │   ├── services.php
+│   │   └── twig.php
+│   ├── controllers
+│   │   ├── baseController.php
+│   │   └── guitarController.php
+│   ├── models
+│   │   └── appModels.php
+│   ├── views
+│   │   ├── cache
+│   │   └── shared
+│   │   │   └── layout.html
+│   │   ├── guitarForm.html
+│   │   ├── guitars.html
+│   │   └── index.html
+│   ├── routes.php
+├── public
+│   ├── css
+│   │   └── main.css
+│   ├── js
+│   │   └── app.php
+├── .htaccess
+├── composer.json
+└── index.php
+</code></pre>
+<h3 id="3-composer-json">3) composer.json</h3>
+<pre><code class="lang-javascript">{
+  &quot;require&quot;: {
+    &quot;slim/slim&quot;: &quot;2.4.3&quot;,
+    &quot;slim/views&quot;: &quot;0.1.2&quot;,
+    &quot;twig/twig&quot;: &quot;v1.16.2&quot;,
+    &quot;illuminate/database&quot;: &quot;v4.2.9&quot;,
+    &quot;illuminate/validation&quot;: &quot;*&quot;,
+    &quot;illuminate/filesystem&quot;: &quot;*&quot;,
+    &quot;illuminate/translation&quot;: &quot;*&quot;,
+    &quot;itsgoingd/slim-services&quot;: &quot;dev-master&quot;
+  },
+  &quot;autoload&quot;: {
+    &quot;classmap&quot;: [
+      &quot;app/controllers&quot;,
+      &quot;app/models&quot;
+    ]
+  }
+}
+</code></pre>
+<p>Vamos comentar as dependências.</p>
+<ul>
+<li><strong>slim/slim</strong>: Nosso framework.</li>
+<li><strong>slim/views</strong>: Para permitir usar um template engine.</li>
+<li><strong>twig/twig</strong>: Nosso template</li>
+<li><strong>illuminate/database</strong>: Nosso ORM.</li>
+<li><strong>illuminate/validation</strong>: Para fazer as validações dos dados.</li>
+<li><strong>illuminate/filesystem, illuminate/translation</strong>: São requeridos pelo slim-services para fazer as tretas dele.</li>
+<li><strong>itsgoingd/slim-services</strong>: É uma lib para adicionar o serviços de uma forma simples no slim.</li>
+</ul>
+<h2 id="4-instalando-as-depend-ncias-com-composer-">4) Instalando as dependências com Composer.</h2>
+<ol>
+<li>Crie o diretório <code>slim-rest</code>.</li>
+<li>Baixe o Composer.<pre><code class="lang-bash">$ curl -sS https://getcomposer.org/installer | php
+</code></pre>
+</li>
+<li>Instale as dependências.<pre><code class="lang-bash">$ php composer.phar install
+</code></pre>
+</li>
+</ol>
+<p>Aqui temos um detalhe legal, no <code>composer.json</code> note o trecho <code>&quot;autoload&quot;</code>, dentro do <code>&quot;classmap&quot;</code> estamos mapeando tudo que for classe dentro dos diretórios informados, isso significa que não precisa ficar dando include das classes que estiverem dentro das pastas informadas.</p>
+<p>Mas tem outro ponto, onde temos que dar um comando para esse mapeamento acontecer, faça assim no terminal dentro da pasta raiz.</p>
+<pre><code class="lang-bash">$ php composer.phar dump-autoload
+</code></pre>
+<p>Isso vai criar os mapeamentos, que você pode acompanhar dentro da pasta <code>vendor/composer/autoload_classmap.php</code>. Lindo né! Lembre-se que quando criar uma pasta nova, precisa dar o comando novamente.</p>
+<p>Não se esqueça desse comando, se alguma classe não for reconhecida pelo Slim, é bem provável que você tenha que rodar ele.</p>
+<p>Vamos para os arquivos.</p>
+<h2 id="5-index-php">5) index.php</h2>
+<p>Esse é nosso arquivo principal de entrada do APP.</p>
+<pre><code class="lang-php">&lt;?php
+# === Para mostrar todos erros
+error_reporting(E_ERROR | E_WARNING | E_PARSE | E_NOTICE);
+ini_set(&#39;display_errors&#39;,&#39;On&#39;);
+
+# === Session
+session_cache_limiter(false);
+@session_start();
+
+# === Constants
+# ==================================================
+// coloque o caminho certo do teu server
+define(&quot;_BASEURL&quot;, &#39;http://localhost/slim-rest/&#39;);
+
+# === Autoload
+# ==================================================
+require_once &#39;vendor/autoload.php&#39;;
+
+# === Slim Initialize
+# ==================================================
+$app = new \Slim\Slim(array(
+  &#39;debug&#39;                =&gt; true,
+  &#39;mode&#39;                 =&gt; &#39;development&#39;,
+  &#39;templates.path&#39;       =&gt; &#39;app/views&#39;,
+  &#39;database.fetch&#39;       =&gt; PDO::FETCH_CLASS,
+  &#39;database.default&#39;     =&gt; &#39;main&#39;,
+  &#39;database.connections&#39; =&gt; array(
+    // coloquei os dados do banco diretamente aqui agora.
+    &#39;main&#39; =&gt; array(
+      &#39;driver&#39;    =&gt; &#39;mysql&#39;,
+      &#39;host&#39;      =&gt; &#39;localhost&#39;,
+      &#39;database&#39;  =&gt; &#39;music&#39;,
+      &#39;username&#39;  =&gt; &#39;root&#39;,
+      &#39;password&#39;  =&gt; &#39;root&#39;,
+      &#39;charset&#39;   =&gt; &#39;utf8&#39;,
+      &#39;collation&#39; =&gt; &#39;utf8_unicode_ci&#39;,
+      &#39;prefix&#39;    =&gt; &#39;&#39;
+    )
+  )
+));
+
+# === Slim Services
+# ==================================================
+require_once &#39;app/config/services.php&#39;;
+
+# === Twig Template
+# ==================================================
+require_once &#39;app/config/twig.php&#39;;
+
+# === Routes
+# ==================================================
+require_once &#39;app/routes.php&#39;;
+
+# === Run Slim
+$app-&gt;run();
+</code></pre>
+<h2 id="6-htaccess">6) .htaccess</h2>
+<pre><code class="lang-bash">RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^ index.php [QSA,L]
+</code></pre>
+<h2 id="7-app-config-services-php">7) app/config/services.php</h2>
+<pre><code class="lang-php">&lt;?php
+use SlimServices\ServiceManager;
+$services = new ServiceManager( $app );
+$services-&gt;registerServices(array(
+  &#39;Illuminate\Events\EventServiceProvider&#39;,
+  &#39;Illuminate\Database\DatabaseServiceProvider&#39;,
+  &#39;Illuminate\Filesystem\FilesystemServiceProvider&#39;,
+  &#39;Illuminate\Translation\TranslationServiceProvider&#39;,
+  &#39;Illuminate\Validation\ValidationServiceProvider&#39;
+));
+</code></pre>
+<h2 id="8-app-config-twig-php">8) app/config/twig.php</h2>
+<pre><code class="lang-php">&lt;?php
+$twig = new \Slim\Views\Twig();
+$app-&gt;view( $twig );
+$app-&gt;view-&gt;parserOptions = array(
+  &#39;charset&#39;          =&gt; &#39;utf-8&#39;,
+  &#39;cache&#39;            =&gt; realpath(&#39;app/views/cache&#39;),
+  &#39;auto_reload&#39;      =&gt; true,
+  &#39;strict_variables&#39; =&gt; false,
+  &#39;autoescape&#39;       =&gt; true
+);
+/* Twig Globals
+=========================================================== */
+# O que setarmos aqui, será visto dentro das views, simple assim.
+$twig-&gt;getEnvironment()-&gt;addGlobal(&#39;baseUrl&#39;, _BASEURL);
+$twig-&gt;getEnvironment()-&gt;addGlobal(&#39;public&#39;, _BASEURL . &#39;public&#39;);
+</code></pre>
+<h2 id="9-app-models-appmodels-php">9) app/models/appModels.php</h2>
+<pre><code class="lang-php">&lt;?php
+
+use Illuminate\Database\Eloquent\Model as Eloquent;
+
+class Brands extends Eloquent
+{
+  protected $table = &#39;brands&#39;;
+}
+
+class Series extends Eloquent
+{
+  protected $table = &#39;series&#39;;
+}
+
+class Guitars extends Eloquent
+{
+  protected $table = &#39;guitars&#39;;
+
+  public function Brand() {
+    return $this-&gt;hasOne(&#39;Brands&#39;,&#39;id&#39;, &#39;fk_brands&#39;);
+  }
+
+  public function Serie() {
+    return $this-&gt;hasOne(&#39;Series&#39;,&#39;id&#39;, &#39;fk_series&#39;);
+  }
+}
+</code></pre>
+<h2 id="10-app-routes-php">10) app/routes.php</h2>
+<p>Aqui vamos mudar o jeito de chamar nossas rotas, vamos criar um arquivo <code>routes.php</code> que invacará as classes dos controllers. Fica mais organizado!</p>
+<p>A forma do Slim invocar uma classe, em vez de chamar a função normal, é colocando o padrão <code>$app-&gt;get(&quot;/url-da-rota&quot;, &quot;NomeDaClasse:Metodo&quot;);</code>, sacou, nome da classe + dois pontos + o método.</p>
+<pre><code class="lang-php">&lt;?php
+
+# Index
+$app-&gt;get(&quot;/&quot;, &quot;BaseController:index&quot;);
+
+# Listagem
+$app-&gt;get(&quot;/guitars&quot;, &quot;GuitarController:guitars&quot;);
+
+# Form Insert e Update
+$app-&gt;get(&quot;/guitar/insert&quot;, &quot;GuitarController:guitarFormInsert&quot;);
+$app-&gt;get(&quot;/guitar/update/:id&quot;, &quot;GuitarController:guitarFormUpdate&quot;);
+
+# Ações CRUD
+$app-&gt;post(&quot;/guitar&quot;, &quot;GuitarController:guitarCreate&quot;);
+$app-&gt;put(&quot;/guitar/:id&quot;, &quot;GuitarController:guitarUpdate&quot;);
+$app-&gt;delete(&quot;/guitar/:id&quot;, &quot;GuitarController:guitarDelete&quot;);
+</code></pre>
+<h2 id="11-app-controllers-basecontrollers-php">11) app/controllers/baseControllers.php</h2>
+<p>Outra forma de organizar, é criar uma classe base, para que seja extendida para as demais classes controllers que você criar, pois quando precisar criar um método que seja compartilhado por todas as classes, coloque a mesma na classe <code>baseController.php</code>!</p>
+<p>Aqui já faço isso, instancio o Slim como <code>$this-&gt;app</code>, e usarei no meu controller. Também aqui já coloquei a rota <code>index</code>.</p>
+<pre><code class="lang-php">&lt;?php
+
+use Slim\Slim as Slim;
+
+class BaseController {
+
+  public $app;
+
+  function __construct() {
+    $this-&gt;app = Slim::getInstance();
+  }
+
+  public function index() {
+
+    $links = array(
+      array(&#39;name&#39; =&gt; &#39;Listagem de Guitarras&#39;, &#39;endpoint&#39; =&gt; &#39;guitars&#39; )
+    );
+
+    $this-&gt;app-&gt;view-&gt;setData(&#39;links&#39;,$links);
+    $this-&gt;app-&gt;render(&quot;index.html&quot;);
+
+  }
+}
+</code></pre>
+<h2 id="12-app-controllers-guitarcontrollers-php">12) app/controllers/guitarControllers.php</h2>
+<p>Esse é o aquivo mais extenso, então vou comentar no código mesmo.</p>
+<pre><code class="lang-php">&lt;?php
+
+# Instancia do Validate
+use Illuminate\Support\Facades\Validator as Validator;
+
+class GuitarController extends BaseController {
+
+  # Listagem
+  public function guitars() {
+
+    $options = array(
+      &#39;title&#39;  =&gt; &#39;Listagem de Guitarras&#39;,
+      &#39;insert&#39; =&gt; &#39;Inserir nova Guitarra&#39;
+    );
+
+    $items = Guitars::with(&#39;Brand&#39;)
+                    -&gt;with(&#39;Serie&#39;)
+                    -&gt;orderBy(&#39;updated_at&#39;,&#39;DESC&#39;)
+                    -&gt;get()
+                    -&gt;toArray();
+
+    // é assim que você passa variáveis para o twig template, usando setData
+    // dentro da view ele estará disponível como {{ items }} e {{ options }}
+    $this-&gt;app-&gt;view-&gt;setData(&#39;items&#39;, $items);
+    $this-&gt;app-&gt;view-&gt;setData(&#39;options&#39;, $options);
+
+    return $this-&gt;app-&gt;render(&quot;guitars.html&quot;);
+
+  }
+
+  # lembre-se que para enviarmos POST, PUT e DELETE, precisamos ter um
+  # input  name=_METHOD com o valor correspondente (ex: value=PUT), para que
+  # seja entendido pelo framework.
+
+  # Form Insert
+  public function guitarFormInsert() {
+
+    // flash messages são mensagens compartilhadas de uma rota para outra
+    // aqui verifico se existe alguma flash message, se sim, seto na view
+    $flash = $this-&gt;app-&gt;view()-&gt;getData(&#39;flash&#39;);
+    if( isset($flash[&#39;post&#39;]) ) {
+      $this-&gt;app-&gt;view-&gt;setData(&#39;item&#39;, $flash[&#39;post&#39;] );
+    }
+
+    $options = array(
+      &#39;title&#39;   =&gt; &#39;Nova Guitarra&#39;,
+      &#39;button&#39;  =&gt; &#39;Salvar Guitarra&#39;,
+      &#39;action&#39;  =&gt; &#39;guitar&#39;,
+      &#39;method&#39;  =&gt; &#39;POST&#39;,
+      &#39;_method&#39; =&gt; &#39;POST&#39;,
+      &#39;brands&#39;  =&gt; Brands::all()-&gt;lists(&#39;id&#39;, &#39;description&#39;),
+      &#39;series&#39;  =&gt; Series::all()-&gt;lists(&#39;id&#39;, &#39;description&#39;)
+    );
+
+    $this-&gt;app-&gt;view-&gt;setData(&#39;options&#39;, $options);
+
+    return $this-&gt;app-&gt;render(&quot;guitarForm.html&quot;);
+
+  }
+
+  # Form Update
+  public function guitarFormUpdate( $id ) {
+
+    $guitar = Guitars::find($id);
+    if( !$guitar ) {
+      $this-&gt;app-&gt;redirect( _BASEURL . &#39;guitars&#39;);
+    }
+
+    $this-&gt;app-&gt;view-&gt;setData(&#39;item&#39;, $guitar );
+
+    $options = array(
+      &#39;title&#39;   =&gt; &#39;Alterando a Guitarra &#39; . $id,
+      &#39;button&#39;  =&gt; &#39;Alterar Guitarra&#39;,
+      &#39;action&#39;  =&gt; &#39;guitar/&#39; . $id,
+      &#39;method&#39;  =&gt; &#39;POST&#39;,
+      &#39;_method&#39; =&gt; &#39;PUT&#39;,
+      &#39;brands&#39;  =&gt; Brands::all()-&gt;lists(&#39;id&#39;, &#39;description&#39;),
+      &#39;series&#39;  =&gt; Series::all()-&gt;lists(&#39;id&#39;, &#39;description&#39;)
+    );
+
+    $this-&gt;app-&gt;view-&gt;setData(&#39;options&#39;, $options);
+
+    return $this-&gt;app-&gt;render(&quot;guitarForm.html&quot;);
+
+  }
+
+  # Validation: é coisa linda, você separa por pipe as regras ( pode usar array também )
+  # principalmente quando precisa usar regex que possui pipe.
+  # confira as regras no site do laravel framework http://laravel.com/docs/4.2/validation
+
+  private function getGuitarValidationRules() {
+    return array(
+      &#39;fk_brands&#39;   =&gt; &#39;required|integer&#39;,
+      &#39;fk_series&#39;   =&gt; &#39;required|integer&#39;,
+      &#39;description&#39; =&gt; &#39;required|min:2|max:10|regex:/^([A-Za-z0-9 ]*)$/&#39;
+    );
+  }
+
+  # Validation: você pode criar mensagens custom para cada campo e tipo de validação
+  # e esse &quot;:attribute&quot; é substituido pelo nome do campo.
+  private function getGuitarValidationMessages() {
+    return array(
+      &#39;fk_brands.required&#39;   =&gt; &#39;required :attribute. Coloque uma Marca rapá!&#39;,
+      &#39;fk_series.required&#39;   =&gt; &#39;required :attribute. Coloque uma Série mano!&#39;,
+      &#39;description.required&#39; =&gt; &#39;required :attribute. Coloque o nome da guitarra!&#39;,
+      &#39;description.min&#39;      =&gt; &#39;min :attribute. Ixi, tem pouca letra!&#39;,
+      &#39;description.max&#39;      =&gt; &#39;max :attribute. Uau, tem muita letra!&#39;,
+      &#39;description.regex&#39;    =&gt; &#39;regex :attribute. Opsss regex está errado véi!&#39;
+    );
+  }
+
+  # só para pegar os dados enviados pelo post
+  private function getGuitarParams() {
+    return array(
+      &#39;fk_brands&#39;   =&gt; $this-&gt;app-&gt;request-&gt;params(&quot;fk_brands&quot;, false),
+      &#39;fk_series&#39;   =&gt; $this-&gt;app-&gt;request-&gt;params(&quot;fk_series&quot;, false),
+      &#39;description&#39; =&gt; $this-&gt;app-&gt;request-&gt;params(&quot;description&quot;, false)
+    );
+  }
+
+  # Validation: Aqui a validação acontece, passe para o validator 3 coisas:
+  # 1:dados post 2:regras 3:mensagens. O método -&gt;fails() retorno true ou false.
+  # Se deu false, você pega as mensagens de erros no método errors-&gt;getMessage()
+  private function guitarValidationFails() {
+
+    $post      = $this-&gt;getGuitarParams();
+    $rules     = $this-&gt;getGuitarValidationRules();
+    $messages  = $this-&gt;getGuitarValidationMessages();
+    # Note que a lib slim-services já colocou no slim a instancia Validator.
+    $validator = $this-&gt;app-&gt;validator-&gt;make( $post, $rules, $messages );
+
+    return $validator-&gt;fails() ? $validator-&gt;errors()-&gt;getMessages() : false;
+
+  }
+
+  # super útil esse método, se passar um $id então é um Update, se não é Insert.
+  private function saveOrUpdateGuitar( $id = false ) {
+
+    if ( $id ) {
+      $guitar = Guitars::find($id);
+    } else {
+      $guitar = new Guitars();
+    }
+
+    $post = $this-&gt;getGuitarParams();
+
+    $guitar-&gt;fk_brands   = $post[&#39;fk_brands&#39;];
+    $guitar-&gt;fk_series   = $post[&#39;fk_series&#39;];
+    $guitar-&gt;description = $post[&#39;description&#39;];
+
+    $guitar-&gt;save();
+
+    return true;
+
+  }
+
+
+  # method post to create
+  public function guitarCreate() {
+
+    $errors = $this-&gt;guitarValidationFails();
+
+    if ( $errors  ) {
+      # olha aqui setando os flash messages.
+      $this-&gt;app-&gt;flash(&#39;message&#39;, &#39;Opppppa! Tem alguns erros na área!!!&#39;);
+      $this-&gt;app-&gt;flash(&#39;errors&#39;, $errors );
+      $this-&gt;app-&gt;flash(&#39;post&#39;, $this-&gt;getGuitarParams() );
+      # redireciono de volta para o form com as mensagens de erros e os
+      # dados preenchidos no form
+      return $this-&gt;app-&gt;redirect(_BASEURL . &quot;guitar/insert&quot;);
+
+    } else {
+      # aqui deu tudo certo, então faz insert e redireciona para listagem
+      $this-&gt;saveOrUpdateGuitar();
+      $this-&gt;app-&gt;flash(&#39;message&#39;, &#39;Oba! Salvou certinho!&#39;);
+      return $this-&gt;app-&gt;redirect(_BASEURL . &quot;guitars&quot;);
+
+    }
+
+  }
+
+  # method put to update
+  public function guitarUpdate( $id ) {
+
+    # usamos mesmo metodo para validação
+    $errors = $this-&gt;guitarValidationFails();
+
+    if ( $errors  ) {
+      # aqui devolvo além dos erros, os dados originais e não os preenchidos no form.
+      $post = Guitars::find($id);
+      $this-&gt;app-&gt;flash(&#39;message&#39;, &#39;Opppppa! Tem alguns erros na área!!!&#39;);
+      $this-&gt;app-&gt;flash(&#39;errors&#39;, $errors );
+      $this-&gt;app-&gt;flash(&#39;post&#39;, $post );
+
+      return $this-&gt;app-&gt;redirect(_BASEURL . &quot;guitar/update/{$id}&quot;);
+
+    } else {
+      # tudo certo, faz update e redireciona para listagem
+      $this-&gt;saveOrUpdateGuitar( $id );
+      $this-&gt;app-&gt;flash(&#39;message&#39;, &#39;Oba! Alterou certinho!&#39;);
+      return $this-&gt;app-&gt;redirect(_BASEURL . &quot;guitars&quot;);
+
+    }
+
+  }
+
+  # method delete to remove
+  public function guitarDelete( $id ) {
+
+    $guitar = Guitars::find($id);
+    $guitar-&gt;delete();
+    $this-&gt;app-&gt;flash(&#39;message&#39;, &#39;Certo! Deletado !&#39;);
+    return $this-&gt;app-&gt;redirect(_BASEURL . &quot;guitars&quot;);
+
+  }
+
+}
+</code></pre>
+<h2 id="13-app-views-shared-layout-html">13) app/views/shared/layout.html</h2>
+<p>Agora vamos para nossos arquivos <code>Twig</code>. O Twig é meu template favorito, ele é muito rápido por cachear as páginas geradas na pasta <code>views/cache</code>, então já sabe, você só cria ela e deixa que o Twig se encarrega de administrar.</p>
+<p>Leia a <a href="http://twig.sensiolabs.org/documentation">documentação do Twig</a>, e verá que ele possui muitos métodos úteis e inteligêntes que te darão muita agilidade no desenvolvimento.</p>
+<p>Esse é o aquivo principal, onde no block <code>content</code> será inserido o conteúdo do template chamado pelo controller, através de um <code>extends</code>.</p>
+<pre><code class="lang-twig">&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+  &lt;meta charset=&quot;UTF-8&quot;&gt;
+  &lt;title&gt;Slim Framework + Twig Template + Illuminate Database/Validation&lt;/title&gt;
+  &lt;link rel=&quot;stylesheet&quot; href=&quot;{{public}}/css/main.css&quot;&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;div class=&quot;container&quot;&gt;
+    &lt;header class=&quot;header&quot;&gt;
+      &lt;h1&gt;&lt;a href=&quot;{{baseUrl}}&quot;&gt;Slim Framework + Twig Template + Illuminate Database/Validation&lt;/a&gt;&lt;/h1&gt;
+    &lt;/header&gt;
+    {% if flash[&#39;message&#39;] %}
+      &lt;div class=&quot;alert&quot;&gt;
+        &lt;p&gt;{{flash[&#39;message&#39;]}}&lt;/p&gt;
+      &lt;/div&gt;
+    {% endif %}
+    {% block content %}{% endblock %}
+    &lt;footer class=&quot;footer&quot;&gt;
+      &lt;a href=&quot;http://slimframework.com/&quot;&gt;Slim Framework&lt;/a&gt; +
+      &lt;a href=&quot;http://twig.sensiolabs.org&quot;&gt;Twig Template&lt;/a&gt; +
+      &lt;a href=&quot;https://github.com/illuminate/database&quot;&gt;Illuminate Database&lt;/a&gt; +
+      &lt;a href=&quot;https://github.com/illuminate/validation&quot;&gt;Illuminate Validation&lt;/a&gt; ;)
+    &lt;/footer&gt;
+  &lt;/div&gt;
+  &lt;script src=&quot;{{public}}/js/app.js&quot;&gt;&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<h2 id="14-app-views-index-html">14) app/views/index.html</h2>
+<pre><code class="lang-twig">{% extends &#39;shared/layout.html&#39; %}
+{% block content %}
+&lt;section class=&quot;section&quot;&gt;
+  &lt;ul class=&quot;list&quot;&gt;
+    {% for link in links %}
+    &lt;li&gt;
+      &lt;a href=&quot;{{baseUrl}}{{link.endpoint}}&quot; class=&quot;button&quot;&gt;
+        &lt;strong&gt;{{link.name}}&lt;/strong&gt;
+      &lt;/a&gt;
+    &lt;/li&gt;
+    {% endfor %}
+  &lt;/ul&gt;
+&lt;/section&gt;
+{% endblock %}
+</code></pre>
+<h2 id="15-app-views-guitars-html">15) app/views/guitars.html</h2>
+<pre><code class="lang-twig">{% extends &#39;shared/layout.html&#39; %}
+{% block content %}
+  &lt;section class=&quot;section&quot;&gt;
+    &lt;h2&gt;{{options.title}}&lt;/h2&gt;
+    &lt;ul class=&quot;list&quot;&gt;
+      &lt;li&gt;
+        &lt;a href=&quot;{{baseUrl}}guitar/insert&quot; class=&quot;button&quot;&gt;
+          &lt;strong&gt;{{options.insert}}&lt;/strong&gt;
+        &lt;/a&gt;
+      &lt;/li&gt;
+    &lt;/ul&gt;
+    &lt;table class=&quot;table&quot;&gt;
+      &lt;thead&gt;
+        &lt;tr&gt;
+          &lt;th&gt;Brand&lt;/th&gt;
+          &lt;th&gt;Serie&lt;/th&gt;
+          &lt;th&gt;Guitar&lt;/th&gt;
+          &lt;th&gt;Criado em&lt;/th&gt;
+          &lt;th&gt;Alterado em&lt;/th&gt;
+          &lt;th&gt;&lt;/th&gt;
+          &lt;th&gt;&lt;/th&gt;
+        &lt;/tr&gt;
+      &lt;/thead&gt;
+      &lt;tbody&gt;
+        {% for i in items %}
+        &lt;tr&gt;
+          &lt;td&gt;
+            {{i.brand.description}}
+          &lt;/td&gt;
+          &lt;td&gt;
+            {{i.serie.description}}
+          &lt;/td&gt;
+          &lt;td&gt;{{i.description}}&lt;/td&gt;
+          &lt;td&gt;{{i.created_at|date(&quot;m/d/Y H:i:s&quot;)}}&lt;/td&gt;
+          &lt;td&gt;{{i.updated_at|date(&quot;m/d/Y H:i:s&quot;)}}&lt;/td&gt;
+          &lt;td&gt;
+            &lt;a href=&quot;{{baseUrl}}guitar/update/{{ i.id }}&quot; class=&quot;button button-sm&quot;&gt;Editar&lt;/a&gt;
+          &lt;/td&gt;
+          &lt;td&gt;
+            &lt;form action=&quot;{{baseUrl}}guitar/{{ i.id }}&quot; method=&quot;POST&quot; class=&quot;js-delete-form&quot;&gt;
+              &lt;input type=&quot;hidden&quot; name=&quot;_METHOD&quot; value=&quot;DELETE&quot;&gt;
+              &lt;div class=&quot;form-group&quot;&gt;
+                &lt;button type=&quot;submit&quot; class=&quot;button button-sm button-dl&quot;&gt;Remover&lt;/button&gt;
+              &lt;/div&gt;
+            &lt;/form&gt;
+          &lt;/td&gt;
+        &lt;/tr&gt;
+        {% endfor %}
+      &lt;/tbody&gt;
+    &lt;/table&gt;
+  &lt;/section&gt;
+{% endblock %}
+</code></pre>
+<h2 id="16-app-views-guitarform-html">16) app/views/guitarForm.html</h2>
+<p>Estou usando um único arquivo para o formulário de insert/update. Basta organizar!</p>
+<pre><code class="lang-twig">{% extends &#39;shared/layout.html&#39; %}
+{% block content %}
+  &lt;section class=&quot;section&quot;&gt;
+    &lt;h2&gt;{{options.title}}&lt;/h2&gt;
+    &lt;form action=&quot;{{baseUrl}}{{options.action}}&quot; class=&quot;form&quot; method=&quot;{{options.method}}&quot;&gt;
+      &lt;input type=&quot;hidden&quot; name=&quot;_METHOD&quot; value=&quot;{{options._method}}&quot;&gt;
+      &lt;div class=&quot;form-group {% if flash[&#39;errors&#39;][&#39;fk_brands&#39;] is defined%}has-error{% endif %}&quot;&gt;
+        &lt;label for=&quot;fk_brands&quot;&gt;Brand&lt;/label&gt;
+        &lt;select name=&quot;fk_brands&quot; id=&quot;fk_brands&quot; class=&quot;form-control&quot;&gt;
+          &lt;option value=&quot;&quot;&gt;-&lt;/option&gt;
+          {% for key, value in options.brands %}
+              {% if value == item.fk_brands %}
+                {% set sel = &quot;selected=selected&quot; %}
+              {% else %}
+                {% set sel = &quot;&quot; %}
+              {% endif %}
+              &lt;option value=&quot;{{value}}&quot; {{sel}}&gt;{{key}}&lt;/option&gt;
+          {% endfor %}
+        &lt;/select&gt;
+        {% if flash[&#39;errors&#39;][&#39;fk_brands&#39;] is defined %}
+        &lt;span class=&quot;error&quot;&gt;
+          {{ flash[&#39;errors&#39;][&#39;fk_brands&#39;]|join(&#39; &#39;) }}
+        &lt;/span&gt;
+        {% endif %}
+      &lt;/div&gt;
+      &lt;div class=&quot;form-group {% if flash[&#39;errors&#39;][&#39;fk_series&#39;] is defined %}has-error{% endif %}&quot;&gt;
+        &lt;label for=&quot;fk_series&quot;&gt;Series&lt;/label&gt;
+        &lt;select name=&quot;fk_series&quot; id=&quot;fk_series&quot; class=&quot;form-control&quot;&gt;
+          &lt;option value=&quot;&quot;&gt;-&lt;/option&gt;
+          {% for key, value in options.series %}
+              {% if value == item.fk_series %}
+                {% set sel = &quot;selected=selected&quot; %}
+              {% else %}
+                {% set sel = &quot;&quot; %}
+              {% endif %}
+              &lt;option value=&quot;{{value}}&quot; {{sel}}&gt;{{key}}&lt;/option&gt;
+          {% endfor %}
+        &lt;/select&gt;
+        {% if flash[&#39;errors&#39;][&#39;fk_series&#39;] is defined %}
+        &lt;span class=&quot;error&quot;&gt;
+          {{ flash[&#39;errors&#39;][&#39;fk_series&#39;]|join(&#39; &#39;) }}
+        &lt;/span&gt;
+        {% endif %}
+      &lt;/div&gt;
+      &lt;div class=&quot;form-group {% if flash[&#39;errors&#39;][&#39;description&#39;] is defined%}has-error{% endif %}&quot;&gt;
+        &lt;label for=&quot;description&quot;&gt;Descrição&lt;/label&gt;
+        &lt;input type=&quot;text&quot; name=&quot;description&quot; id=&quot;description&quot; class=&quot;form-control&quot; value=&quot;{{item.description}}&quot;&gt;
+        {% if flash[&#39;errors&#39;][&#39;description&#39;] is defined%}
+        &lt;span class=&quot;error&quot;&gt;
+          {{ flash[&#39;errors&#39;][&#39;description&#39;]|join(&#39;&lt;br&gt;&#39;)|raw }}
+        &lt;/span&gt;
+        {% endif %}
+      &lt;/div&gt;
+      &lt;div class=&quot;form-group&quot;&gt;
+        &lt;button class=&quot;button&quot; type=&quot;submit&quot;&gt;{{options.button}}&lt;/button&gt;
+      &lt;/div&gt;
+    &lt;/form&gt;
+  &lt;/section&gt;
+{% endblock %}
+</code></pre>
+<h2 id="17-public-css-main-css">17) public/css/main.css</h2>
+<p>Vamos dar um estilo.</p>
+<pre><code class="lang-css">html {
+  text-align: center;
+  font: 100%/1.5 &#39;Arial&#39;, sans-serif;
+  font-weight: 400;
+  -webkit-box-sizing: border-box;
+     -moz-box-sizing: border-box;
+          box-sizing: border-box;
+}
+*, *:before, *:after {
+  padding: 0;
+  margin: 0;
+  -webkit-box-sizing: inherit;
+     -moz-box-sizing: inherit;
+          box-sizing: inherit;
+}
+body {
+  background-color: #fcfcfc;
+  color: #333;
+}
+
+a {
+  color: #DE4F4F;
+}
+a:hover {
+  color: #000;
+}
+
+h1 {
+  padding: 10px;
+  font-size: 1.3em;
+}
+h1 a {
+  color: #fff;
+  text-decoration: none;
+}
+h1 a:hover {
+  color: #fce5e5;
+}
+
+h2 {
+  font-size: 1.2em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: #222;
+}
+
+.container {
+  margin: 40px auto;
+  max-width: 700px;
+}
+
+.header {
+  background-color: #DE4F4F;
+  border: solid 2px #DE4F4F;
+  border-radius: 4px;
+}
+
+.section {
+
+}
+
+.list {
+  margin: 0 auto;
+  max-width: 300px;
+}
+
+.list li {
+  margin: 10px 0;
+  list-style: none;
+}
+
+.footer, .section {
+  margin: 10px 0;
+  padding: 10px;
+  border: solid 2px #DE4F4F;
+  border-radius: 4px;
+  font-size: 0.9em;
+  color: #999;
+}
+
+table {
+  width: 100%;
+  margin-bottom: 20px;
+  max-width: 100%;
+  background-color: transparent;
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+table thead {
+  text-align: left;
+}
+table thead &gt; tr &gt; th {
+  padding: 20px 8px;
+  color: #444;
+  font-weight: 700;
+  background: #f6f6f6;
+  border-bottom: 1px solid #ddd;
+  font-size: 0.9em;
+}
+
+table tbody &gt; tr &gt; td {
+  text-align: left;
+  padding: 14px 8px;
+  line-height: 1.428571429;
+  vertical-align: middle;
+  border-top: 1px solid #f1f1f1;
+  font-size: 0.8em;
+}
+
+table tbody &gt; tr &gt; td small {
+  display: block;
+  font-size: 0.8em;
+  color: #999;
+}
+
+.form-group {
+  margin: 0 auto;
+  padding: 4px;
+  max-width: 300px;
+  margin-bottom: 4px;
+  text-align: left;
+}
+.form-group label {
+  margin: 0 0 4px;
+  font-size: .9em;
+  font-weight: 700;
+  line-height: 1.7;
+  color: #444;
+  display: block;
+}
+
+.form-control {
+  display: block;
+  margin: 0 0 2px;
+  padding: 0 0 0 10px;
+  text-indent: 10px;
+  width: 100%;
+  height: 40px;
+  font-size: 0.9em;
+  line-height: 1.42857143;
+  color: #444;
+  border: 2px solid #ccc;
+  border-radius: 4px;
+  outline: none;
+  box-shadow: inset 1px 1px 2px rgba(0,0,0,0.05);
+  -webkit-transition: border-color ease-in-out .15s, -webkit-box-shadow ease-in-out .15s;
+  -o-transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+  transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+}
+.form-control:focus {
+  border-color: #de4f4f;
+}
+
+select.form-control {
+  text-indent: 0px;
+  height: 40px;
+}
+
+.error {
+  display: none;
+  color: #fff;
+  font-size: 0.8em;
+  padding: 4px 12px;
+  border-radius: 3px;
+  border: 1px solid #8F3DBE;
+  background: #8F3DBE;
+  -webkit-transition: all ease-in-out .15s, all ease-in-out .15s;
+     -moz-transition: all ease-in-out .15s, all ease-in-out .15s;
+          transition: all ease-in-out .15s, all ease-in-out .15s;
+  -webkit-transform: scale(0);
+     -moz-transform: scale(0);
+          transform: scale(0);
+}
+
+.has-error .error {
+  display: inline-block;
+  -webkit-transform: scale(1);
+    -moz-transform: scale(1);
+         transition: all ease-in-out .15s, all ease-in-out .15s;
+}
+.has-error .form-control {
+  border-color: #8F3DBE!important;
+}
+
+.button {
+  display: inline-block;
+  vertical-align: middle;
+  cursor: pointer;
+  border: 2px solid #de4f4f;
+  white-space: nowrap;
+  padding: 8px 12px;
+  font-size: 14px;
+  line-height: 1.42857143;
+  border-radius: 4px;
+  background: #FFF;
+  color: #de4f4f;
+  -webkit-transition: all 0.2s linear;
+     -moz-transition: all 0.2s linear;
+          transition: all 0.2s linear;
+  text-decoration: none;
+  width: 100%;
+}
+
+.button:hover,
+.button:focus {
+  border: 2px solid #de4f4f;
+  background-color: #de4f4f;
+  color: white;
+}
+.button:focus {
+  outline: 0;
+}
+
+.button-sm {
+  padding: 4px 6px;
+  font-size: 12px;
+  text-align: center;
+}
+
+.button-dl {
+  text-align: center;
+  background: #CC0000;
+  color: #fff;
+}
+
+.alert {
+  margin: 20px auto;
+}
+.alert p {
+  padding: 20px;
+  margin-bottom: 20px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: #fff;
+  background: #8F3DBE;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
+</code></pre>
+<h2 id="18-public-js-app-js">18) public/js/app.js</h2>
+<p>Só um script para mostrar um confirm quando exluir.</p>
+<pre><code class="lang-javascript">;(function() {
+
+  &#39;use strict&#39;;
+
+  var app = App.prototype;
+
+  function App(){
+    this.init();
+  };
+
+  app.init = function () {
+    var form = document.querySelectorAll(&#39;.js-delete-form&#39;);
+    for (var prop in form) {
+      if ( form.hasOwnProperty(prop) ) {
+        if ( &quot;onsubmit&quot; in form[prop] ) {
+          form[prop].onsubmit = this.onSubmit;
+        }
+      }
+    }
+  };
+
+  app.onSubmit = function () {
+    if ( confirm(&#39;Deseja mesmo excluir rapá ?&#39;) ) {
+      return true;
+    }
+    return false;
+  };
+
+  document.addEventListener( &#39;DOMContentLoaded&#39;, new App(), false );
+
+})();
+</code></pre>
+<p>Pronto!!!</p>
+<p>Agora abra seu browser no endereço do seu APP, no meu caso é <code>http://localhost/slim-rest/</code>.</p>
+<p>Extenso né ? Sei disso, mas espero que sirva de ajuda ou auxílio para você.</p>
+<p>Mais uma coisa, <a href="http://192.241.214.149/slim-rest/">clique aqui e veja o app funcionando</a>.</p>
+<p>Obrigado por ler, e até o próximo post.</p>
+<p>That&#39;s it!</p>
+]]>
         </content:encoded>
       </item>
-      
       <item>
         <title><![CDATA[Criando um Rest com Slim Framework em poucos minutos - parte 1]]></title>
         <description><![CDATA[O Slim é um framework em PHP, ele é leve e muito útil, e nós usaremos o Illuminate Database que é um ORM inteligente.]]></description>
         <link>http://expalmer.github.io/criando-um-rest-com-slim-framework-e-illuminate-database-em-poucos-minutos-parte-1/</link>
         <guid isPermaLink="true">http://expalmer.github.io/criando-um-rest-com-slim-framework-e-illuminate-database-em-poucos-minutos-parte-1/</guid>
-        
         <category><![CDATA[php]]></category>
-        
         <category><![CDATA[slimframework]]></category>
-        
         <dc:creator><![CDATA[Palmer Oliveira]]></dc:creator>
         <pubDate>Sat, 22 Nov 2014 12:10:36 GMT</pubDate>
         <content:encoded>
-          <![CDATA[]]>
+          <![CDATA[<p>O <a href="http://slimframework.com/">Slim Framework</a> é um framework em PHP que uso praticamente em todos meus projetos em PHP, ele é leve e muito útil.</p>
+<p>E juntamente com o Slim, eu uso o <a href="https://github.com/illuminate/database">Illuminate Database</a> que é um componente de ORM onde você não precisa gastar horas criando suas classes de banco de dados para consulta, relacionamento e tudo mais, ele abstrai toda essa parte.</p>
+<p>Para ver o funcionamento do Slim, vamos criar uma API de cadastro de guitarras, só que neste post vamos primeiramente criar as rotas de leitura de nosso produto.</p>
+<p>Nos posts seguintes, iremos criar o CRUD para deixar completo nosso Rest. Também veremos o funcionamento de um template engine e usaremos alguma lib javascript para fazer as ações no front-end.</p>
+<h2 id="1-para-come-ar-criaremos-os-dados-">1) Para começar criaremos os dados!</h2>
+<p>Crie 3 tabelas abaixo no MySql:</p>
+<ul>
+<li><strong>brands</strong>: Marca da guitarra.</li>
+<li><strong>series</strong>: Modelo da Guitarra.</li>
+<li><strong>guitars</strong>: A guitarra em sí, ela terá 2 chaves estrangeiras para ( <strong>brands</strong> e <strong>series</strong>).</li>
+</ul>
+<p>Alimente com esses dados:</p>
+<pre><code class="lang-sql">
+# brands
+INSERT INTO brands (id, description, created_at, updated_at) VALUES
+  (1, &#39;Gibson&#39;, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (2, &#39;Fender&#39;, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (3, &#39;Epiphone&#39;, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (4, &#39;PRS&#39;, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (5, &#39;Ibanez&#39;, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (6, &#39;Martin&#39;, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (7, &#39;Taylor&#39;, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+# series
+INSERT INTO series (id, description, created_at, updated_at) VALUES
+  (1, &#39;Les Paul&#39;, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (2, &#39;SG&#39;, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (3, &#39;RD&#39;, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (4, &#39;Flying V&#39;, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (5, &#39;Firebird&#39;, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (6, &#39;Statocaster&#39;, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (7, &#39;Telecaster&#39;, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (8, &#39;Jaguar&#39;, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (9, &#39;Custom&#39;, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (10, &#39;Retro&#39;, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (11, &#39;DX&#39;, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (12, &#39;HD-28&#39;, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+# guitars
+# informamos brand, serie e um nome para a guitarra
+INSERT INTO guitars (id, fk_brands, fk_series, description, created_at, updated_at) VALUES
+  (1, 1, 1, &#39;Standart&#39;, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (2, 1, 2, &#39;Pro&#39;, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (3, 1, 3, &#39;Studio&#39;, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (4, 2, 6, &#39;Standart&#39;, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (5, 2, 7, &#39;Pro&#39;, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (6, 2, 8, &#39;Studio&#39;, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (7, 3, 1, &#39;Standart&#39;, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (8, 3, 2, &#39;Pro&#39;, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (9, 4, 9, &#39;Studio&#39;, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (10, 4, 9, &#39;Standart&#39;, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+</code></pre>
+<h3 id="2-estrutura-de-arquivos-do-app">2 ) Estrutura de arquivos do APP</h3>
+<pre><code class="lang-javascript">
+slim-rest
+├── app
+│   ├── config
+│   │   └── database.php
+│   ├── controllers
+│   │   └── appControllers.php
+│   ├── helpers
+│   │   └── appHelpers.php
+│   ├── models
+│   │   └── appModels.php
+├── .htaccess
+├── composer.json
+└── index.php
+</code></pre>
+<p>Nós vamos instalar o Slim com o <a href="https://getcomposer.org/">Composer</a>, um gerenciador de dependências PHP. Se você não conhece ainda, essa é uma boa hora conhecer.</p>
+<h3 id="3-composer-json">3) composer.json</h3>
+<pre><code class="lang-javascript">{
+  &quot;require&quot;: {
+    &quot;slim/slim&quot;: &quot;2.4.3&quot;,
+    &quot;illuminate/database&quot;: &quot;v4.2.9&quot;
+  }
+}
+</code></pre>
+<p>Vamos comentar as dependências.</p>
+<ul>
+<li><strong>slim/slim</strong>: Nosso framework.</li>
+<li><strong>illuminate/database</strong>: Nosso ORM.</li>
+</ul>
+<h2 id="4-instalando-as-depend-ncias-com-composer-">4) Instalando as Dependências com Composer.</h2>
+<p>Crie o diretório do nosso projeto que chamamos de <code>slim-rest</code> e dentro dela baixe o <code>composer</code> com o comando abaixo:</p>
+<pre><code class="lang-bash">$ curl -sS https://getcomposer.org/installer | php
+</code></pre>
+<p>Esse comando vai baixar um arquivo chamado <code>composer.phar</code>, pois ele que vai fazer o trabalho de instalar suas dependências.</p>
+<p>Ainda na raiz do diretório <code>slim-rest</code>, dê o comando para instalar as dependências.</p>
+<pre><code class="lang-bash">$ php composer.phar install
+</code></pre>
+<p>O composer vai criar um diretório chamado <code>vendor</code> contendo todas as suas dependências.</p>
+<p>Agora que baixou as dependências, vamos criar nossos arquivos.</p>
+<h2 id="5-index-php">5) index.php</h2>
+<p>Esse é nosso arquivo principal de entrada do APP.</p>
+<pre><code class="lang-php">&lt;?php
+
+# === constants
+# ==================================================
+define(&quot;_APP&quot;, dirname(__FILE__) . &#39;/app&#39;);
+
+# === slim
+# ==================================================
+require &#39;vendor/autoload.php&#39;;
+$app = new \Slim\Slim(array(
+  &#39;debug&#39; =&gt; true
+));
+
+# === config
+# ==================================================
+require_once _APP . &#39;/config/database.php&#39;;
+
+# === helpers
+# ==================================================
+require_once _APP . &#39;/helpers/appHelpers.php&#39;;
+
+# === models
+# ==================================================
+require_once _APP . &quot;/models/appModels.php&quot;;
+
+# === controllers
+# ==================================================
+require_once _APP . &quot;/controllers/appControllers.php&quot;;
+
+# === run slim
+$app-&gt;run();
+</code></pre>
+<h2 id="6-htaccess">6) .htaccess</h2>
+<pre><code class="lang-bash">RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^ index.php [QSA,L]
+</code></pre>
+<h2 id="7-app-config-database-php">7) app/config/database.php</h2>
+<pre><code class="lang-php">
+&lt;?php
+// Database configuration
+$settings = array(
+  &#39;driver&#39;    =&gt; &#39;mysql&#39;,
+  &#39;host&#39;      =&gt; &#39;localhost&#39;,
+  &#39;database&#39;  =&gt; &#39;database&#39;,
+  &#39;username&#39;  =&gt; &#39;user&#39;,
+  &#39;password&#39;  =&gt; &#39;password&#39;,
+  &#39;charset&#39;   =&gt; &#39;utf8&#39;,
+  &#39;collation&#39; =&gt; &#39;utf8_unicode_ci&#39;,
+  &#39;prefix&#39;    =&gt; &#39;&#39;
+);
+
+use Illuminate\Database\Capsule\Manager as Capsule;
+$capsule = new Capsule;
+$capsule-&gt;addConnection( $settings );
+$capsule-&gt;bootEloquent();
+</code></pre>
+<h2 id="8-app-helpers-apphelpers-php">8) app/helpers/appHelpers.php</h2>
+<p>Aqui criei um helper para dar output em json.</p>
+<pre><code class="lang-php">&lt;?php
+use Slim\Slim;
+
+class helpers {
+
+  static function jsonResponse( $error = true, $message = &#39;&#39;, $data = array() ) {
+
+    $app               = Slim::getInstance();
+    $response          = new stdClass();
+    $response-&gt;error   = $error;
+    $response-&gt;message = $message;
+    $response-&gt;data    = $data;
+
+    $app-&gt;response()-&gt;header(&#39;Content-Type&#39;, &#39;application/json&#39;);
+    return $app-&gt;response()-&gt;body( json_encode($response) );
+
+  }
+
+}
+</code></pre>
+<h2 id="9-app-models-appmodels-php">9) app/models/appModels.php</h2>
+<p>Aqui é onde o <strong>Illuminate</strong> reconhece nossas classes de Model, apenas crie uma classe com extends nele, informe o nome da tabela e pronto. Cara, ele é muito útil e possui muitos outros recursos que fará você ganhar tempo em seus projetos.</p>
+<p>Para saber como usar mais recursos do  <strong>Illuminate</strong>, olhe a documentação no <a href="http://laravel.com/docs/4.2/eloquent">site do Laravel</a>, pois ele usa esse component também.</p>
+<pre><code class="lang-php">&lt;?php
+
+class Brands extends Illuminate\Database\Eloquent\Model
+{
+  protected $table = &#39;brands&#39;;
+}
+
+class Series extends Illuminate\Database\Eloquent\Model
+{
+  protected $table = &#39;series&#39;;
+}
+
+class Guitars extends Illuminate\Database\Eloquent\Model
+{
+  protected $table = &#39;guitars&#39;;
+
+  public function Brand() {
+    return $this-&gt;hasOne(&#39;Brands&#39;,&#39;id&#39;, &#39;fk_brands&#39;);
+  }
+
+  public function Serie() {
+    return $this-&gt;hasOne(&#39;Series&#39;,&#39;id&#39;, &#39;fk_series&#39;);
+  }
+}
+</code></pre>
+<h2 id="10-app-controllers-appcontrollers-php">10) app/controllers/appControllers.php</h2>
+<pre><code class="lang-php">&lt;?php
+
+# === api
+# ==================================================
+$app-&gt;get(&#39;/api/v1/brands&#39;, function() use ($app) {
+
+  $results = Brands::all();
+  return helpers::jsonResponse(false, &#39;results&#39;, $results );
+
+});
+
+$app-&gt;get(&#39;/api/v1/series&#39;, function() use ($app) {
+
+  $results = Series::all();
+  return helpers::jsonResponse(false, &#39;results&#39;, $results );
+
+});
+
+$app-&gt;get(&#39;/api/v1/guitars&#39;, function() use ($app) {
+
+  $results = [];
+  $description = $app-&gt;request-&gt;get(&#39;description&#39;);
+  if ( $description ) {
+    $results = Guitars::with(&#39;Brand&#39;)
+                      -&gt;with(&#39;Serie&#39;)
+                      -&gt;where(&#39;description&#39;,&#39;LIKE&#39;,&quot;%{$description}%&quot;)
+                      -&gt;get();
+  } else {
+    $results = Guitars::with(&#39;Brand&#39;)
+                      -&gt;with(&#39;Serie&#39;)
+                      -&gt;get();
+  }
+  $message = $results-&gt;count() . &#39; results&#39;;
+  return helpers::jsonResponse(false, $message, $results );
+
+});
+</code></pre>
+<p>Pronto!!!</p>
+<p>Agora abra seu browser no endereço do seu APP, no meu caso é <code>http://localhost/slim-rest/</code>, então as rotas ficaram assim:</p>
+<ul>
+<li><code>http://localhost/slim-rest/api/v1/brands</code>: As marcas.</li>
+<li><code>http://localhost/slim-rest/api/v1/series</code>: Os modelos.</li>
+<li><code>http://localhost/slim-rest/api/v1/guitars</code>: As guitarras com sua respectiva marca e modelo.</li>
+</ul>
+<p>Temos também uma pequena busca no campo <code>description</code> na rota guitars, testa assim: <code>http://localhost/slim-rest/api/v1/guitars?description=a</code>.</p>
+<p>Então isso é só o começo, podemos criar muitas coisas em cima disso.</p>
+<p>Não expliquei detalhadamente cada arquivo, mas se você tiver alguma dúvida pode me perguntar que terei o prazer em ajuda-lo. Caso tenha alguma dica de melhoria, será bem vinda!</p>
+<p>Concluindo, o <code>Slim</code> é muito bacana pois em minutos você levanta uma aplicação bem organizada, rápida e segura. Note que usamos o <code>Illuminate</code> para pegar os dados do banco, inclusive com join e outras tabelas, e tudo isso de uma forma simples.</p>
+<p>Com pouco código já temos nosso Rest definido!</p>
+<p>Obrigado por ler, e até o próximo post.</p>
+<p>That&#39;s it!</p>
+]]>
         </content:encoded>
       </item>
-      
       <item>
         <title><![CDATA[Criando um Blog Estático com Metalsmith contendo tags, gists, drafts e um rss feed]]></title>
         <description><![CDATA[Dessa vez vamos criar novamente um blog estático, mas agora contendo tags, gists, drafts e rss feed]]></description>
         <link>http://expalmer.github.io/criando-um-blog-estatico-com-metalsmith-contendo-tags-gists-drafts-e-um-rss-feed/</link>
         <guid isPermaLink="true">http://expalmer.github.io/criando-um-blog-estatico-com-metalsmith-contendo-tags-gists-drafts-e-um-rss-feed/</guid>
-        
         <category><![CDATA[metalsmith]]></category>
-        
         <category><![CDATA[javascript]]></category>
-        
         <category><![CDATA[nodejs]]></category>
-        
         <dc:creator><![CDATA[Palmer Oliveira]]></dc:creator>
         <pubDate>Mon, 20 Oct 2014 15:39:06 GMT</pubDate>
         <content:encoded>
-          <![CDATA[]]>
+          <![CDATA[<p>Vamos complementar nosso blog feito em <a href="http://metalsmith.io/">Metalsmith</a> com as features <code>tags</code>, <code>gist</code>, <code>drafts</code> e um <code>rss feed</code>.</p>
+<p>Lembra dos plugins que mencionei no post passado? Pois é, o de <code>tags</code> <a href="https://github.com/totocaster/metalsmith-tags">metalsmith-tags</a> eu contribui, e o plugin de <code>gist</code> <a href="https://github.com/expalmer/metalsmith-gist">metalsmith-gist</a> eu criei, e esses que usaremos aqui :).</p>
+<p>O plugin <code>drafts</code> é para rascunhos, você cria seus posts, mas eles não serão gerados na pasta<code>build</code>.</p>
+<p>O <code>rss feed</code> fiz do meu jeito, mas recentemente criaram um plugin pra isso <a href="https://github.com/hurrymaplelad/metalsmith-feed">metalsmith-feed</a>. Depois dê uma olhada!</p>
+<p>Antes de postar os arquivos, queria te dar uma dica dessa <strong>lib</strong> muito legal chamada <a href="http://simbco.github.io/httpster/">httpster</a>.
+Use ela para levantar um server <code>nodejs</code> em qualquer diretório que quiser.</p>
+<p>Instale globalmente em sua máquina <code>npm -g install httpster</code>, depois entre na pasta desejada ( no nosso caso, entre na pasta <code>build</code> ) e dê o comando <code>httpster</code> então será levantado um servidor em <code>http://localhost:3333/</code>.
+É mágico! Estou usando direto para abrir meus projetos locais.</p>
+<h3 id="1-estrutura-de-arquivos-do-blog-">1 ) Estrutura de arquivos do Blog.</h3>
+<pre><code class="lang-javascript">- blog
+---- index.js
+---- package.json
+---- src
+-------- index.md
+-------- rss.xml
+-------- css
+-------------- style.css
+-------- posts
+-------------- post-1.md
+-------------- post-2.md
+-------------- post-3.md
+-------------- post-4.md
+---- templates
+-------------- partials
+----------------------- footer.hbt
+----------------------- header.hbt
+-------------- index.hbt
+-------------- posts.hbt
+-------------- rss.hbt
+-------------- tags.hbt
+</code></pre>
+<h3 id="2-package-json">2) package.json</h3>
+<pre><code class="lang-javascript">{
+  &quot;name&quot;: &quot;blog&quot;,
+  &quot;description&quot;: &quot;meu blog legal&quot;,
+  &quot;version&quot;: &quot;0.0.1&quot;,
+  &quot;dependencies&quot;: {
+    &quot;handlebars&quot;: &quot;^2.0.0&quot;,
+    &quot;metalsmith&quot;: &quot;^0.11.0&quot;,
+    &quot;metalsmith-collections&quot;: &quot;^0.6.0&quot;,
+    &quot;metalsmith-drafts&quot;: &quot;0.0.1&quot;,
+    &quot;metalsmith-gist&quot;: &quot;^0.3.0&quot;,
+    &quot;metalsmith-markdown&quot;: &quot;^0.2.1&quot;,
+    &quot;metalsmith-permalinks&quot;: &quot;^0.4.0&quot;,
+    &quot;metalsmith-tags&quot;: &quot;^0.6.1&quot;,
+    &quot;metalsmith-templates&quot;: &quot;^0.5.2&quot;,
+    &quot;metasmith&quot;: &quot;0.0.1&quot;,
+    &quot;moment&quot;: &quot;^2.8.3&quot;
+  }
+}
+</code></pre>
+<p>Vamos comentar as dependências novamente.</p>
+<ul>
+<li><strong>metalsmith-drafts</strong>: Criar arquivos do tipo rascunho.</li>
+<li><strong>metalsmith-collections</strong>: Cria um objeto chamado <code>collections</code> com todos os posts.</li>
+<li><strong>metalsmith-markdown</strong>: Interpreta nossos arquivos <code>.md</code>.</li>
+<li><strong>metalsmith-permalinks</strong>: Muda o nome original do arquivo para uma url amigável.</li>
+<li><strong>metalsmith-gist</strong>: Pega gists do github e inclui na página.</li>
+<li><strong>metalsmith-tags</strong>: Cria páginas conforme as tags informadas.</li>
+<li><strong>metalsmith-templates</strong>: Permite usar um template engine.</li>
+<li><strong>handlebars</strong>: Nosso template engine.</li>
+<li><strong>moment</strong>: Para manipular datas.</li>
+</ul>
+<p>Instale as dependências. Dê o comando na raiz do diretório <code>blog</code>.</p>
+<pre><code class="lang-javascript">$ npm install
+</code></pre>
+<h2 id="vou-come-ar-pelo-arquivo-index-js-porque-precisamos-criar-alguns-handlebars-helpers-">Vou começar pelo arquivo <code>index.js</code>, porque precisamos criar alguns Handlebars helpers.</h2>
+<p>Precisaremos criar helpers para <strong>partials</strong> e <strong>formatação de datas</strong>. Note que criei esses 3 helpers que usaremos em nossos templates.
+Usarei também o plugin <a href="http://momentjs.com/">moment</a> para manipular datas.</p>
+<h3 id="3-index-js">3) index.js</h3>
+<pre><code class="lang-javascript">
+var Metalsmith   = require(&#39;metalsmith&#39;);
+var collections  = require(&#39;metalsmith-collections&#39;);
+var markdown     = require(&#39;metalsmith-markdown&#39;);
+var templates    = require(&#39;metalsmith-templates&#39;);
+var permalinks   = require(&#39;metalsmith-permalinks&#39;);
+var tags         = require(&#39;metalsmith-tags&#39;);
+var gist         = require(&#39;metalsmith-gist&#39;);
+var drafts       = require(&#39;metalsmith-drafts&#39;);
+
+var fs           = require(&#39;fs&#39;);
+var Handlebars   = require(&#39;handlebars&#39;);
+var moment       = require(&#39;moment&#39;);
+
+// Handlebars Helpers
+Handlebars.registerPartial({
+  &#39;header&#39;: fs.readFileSync(&#39;./templates/partials/header.hbt&#39;).toString(),
+  &#39;footer&#39;: fs.readFileSync(&#39;./templates/partials/footer.hbt&#39;).toString()
+});
+Handlebars.registerHelper(&#39;dateFormat&#39;, function( context ) {
+  return moment(context).format(&quot;LL&quot;);
+});
+Handlebars.registerHelper(&#39;dateGMT&#39;, function( context ) {
+  context = context === &#39;new&#39; ? new Date() : context;
+  return context.toGMTString();
+});
+
+Metalsmith(__dirname)
+  .use(drafts())                 // páginas com atributo &#39;draft: true&#39; não serão geradas.
+  .use(collections({             // nos dará acesso a um objeto chamado &#39;collections&#39; ...
+      posts: {                   // ... com todos os posts
+          pattern: &#39;posts/*.md&#39;, // aqui é o lugar onde estão nossos posts
+          sortBy: &#39;date&#39;,        // ordenar por data
+          reverse: true          // ordenar da data mais recente para a mais antiga
+      }
+  }))
+  .use(markdown())        // vai ler todos arquivos .md e transformar em um objeto
+  .use(permalinks({       // vai mudar o arquivo destino no padrão {title}/index.html
+      pattern: &#39;:title&#39;,
+      relative: false
+  }))
+  .use(gist()) // adiciona gists nas páginas desejadas.
+  .use(tags({  // criará páginas conforme as tags informadas
+    handle: &#39;tags&#39;,
+    template:&#39;tags.hbt&#39;,
+    path:&#39;tags&#39;,
+    sortBy: &#39;title&#39;,
+    reverse: true
+  }))
+  .use(templates(&#39;handlebars&#39;)) // nossos objetos serão passados para o handlebars
+  .destination(&#39;./build&#39;)       // diretório destino
+  .build(function(err, files) { // escreve os aquivos no diretório build
+    if (err) { throw err; }     // um handler de erro, sempre é bom
+  });
+</code></pre>
+<h2 id="p-ginas-do-blog">Páginas do Blog</h2>
+<h3 id="4-src-index-md">4) src/index.md</h3>
+<pre><code class="lang-javascript">---
+template: index.hbt
+---
+
+Bem vindo ao meu blog! Confira abaixo meus **posts**.
+</code></pre>
+<h3 id="5-src-posts-post-1-md">5) src/posts/post-1.md</h3>
+<p>Aqui temos campos novos como <code>date, description, author e tags</code>.</p>
+<pre><code class="lang-javascript">---
+title: Meu Primeiro Post com Metalsmith
+template: posts.hbt
+date: 2014-03-01
+description: Como criar um post com Metalsmith. Para o RSS Feed.
+author: Palmer. Para o RSS Feed.
+tags: metalsmith, nodejs, javascript
+---
+
+## Aprendendo a usar o [Metalsmith](http://metalsmith.io).
+
+### Porque usar Metalsmith ?
+
+- É fácil.
+- Divertido.
+- É em javascript.
+- Eu curti.
+</code></pre>
+<h3 id="6-src-posts-post-2-md">6) src/posts/post-2.md</h3>
+<p>Neste arquivo colocamos um bloco de código markdown.</p>
+<pre><code class="lang-javascript">---
+title: Meu Segundo Post sobre MEAN
+template: posts.hbt
+date: 2014-03-01
+description: Use MEAN facilmente. Para o RSS Feed.
+author: Palmer. Para o RSS Feed.
+tags: mongodb, express, angular, nodejs, javascript
+---
+
+## Aprenda a usar uma solução fullstack de javascript
+
+### Porque usar MEAN ?
+
+- Porque você usa um única linguagem.
+- Divertido.
+- É em javascript.
+- Eu curti.
+
+  ```javascript
+
+  // server.js
+
+  ...
+
+  app.configure(function() {
+
+    // set up our express application
+    app.use(express.logger(&#39;dev&#39;));
+    app.use(express.cookieParser());
+    app.use(express.bodyParser());
+
+    app.set(&#39;view engine&#39;, &#39;ejs&#39;);
+
+    // required for passport
+    app.use(express.session({ secret: &#39;mysecret&#39; }));
+    app.use(passport.initialize());
+    app.use(passport.session());
+    app.use(flash());
+
+  });
+
+  ...
+
+  ```\aqui são só 3 as aspas, então retire esse comentário
+</code></pre>
+<h3 id="7-src-posts-post-3-md">7) src/posts/post-3.md</h3>
+<p>Esse é nosso post do tipo <strong>rascunho</strong>, note o campo <code>draft: true</code>, ou seja, esse post não será gerado na pasta <code>build</code>.</p>
+<pre><code class="lang-javascript">  ---
+  title: Um Post que ainda não está pronto, portanto fica em draft
+  draft: true
+  template: posts.hbt
+  date: 2014-10-20
+  description: Post Não Pronto. Para o RSS Feed.
+  author: Palmer. Para o RSS Feed.
+  tags: nodejs
+  ---
+
+  ## Rest com NodeJS
+
+  ### Porque usar Node ?
+
+  Tenho que ver o que escrever ainda.
+</code></pre>
+<h3 id="8-src-posts-post-4-md">8) src/posts/post-4.md</h3>
+<p>Neste arquivo estamos usando o plugin <strong>metalsmith-gist</strong>, você informa o usuário e o nome da hash do gist <code>gist: expalmer/43952d905d75693dea0c</code>, e depois referencia ele no corpo do post.
+Nesse exemplo o gist original <a href="https://gist.github.com/expalmer/43952d905d75693dea0c">é esse aqui</a>.</p>
+<pre><code class="lang-javascript">  ---
+  title: Um Post de React com um Gist do Github
+  template: posts.hbt
+  date: 2014-10-19
+  description: Usando um Gist de React. Para o RSS Feed.
+  author: Palmer. Para o RSS Feed.
+  tags: react, javascript
+  gist: expalmer/43952d905d75693dea0c
+  ---
+
+  ## Começando com [React](http://facebook.github.io/react/).
+
+  ### Porque usar React ?
+
+  - É rápido.
+  - É organizado e modularizado.
+  - É em javascript.
+  - Eu curti.
+
+  Vamos começar então.
+
+  gist:expalmer/43952d905d75693dea0c
+</code></pre>
+<h3 id="9-src-rss-xml">9) src/rss.xml</h3>
+<p>Essa página irá somente conter os dados para o <code>rss</code>. Aqui eu coloquei <code>base:http://localhost:3333</code> mas depois você deve colocar um endereço certinho, no caso o do seu blog.</p>
+<pre><code class="lang-javascript">  ---
+  template: rss.hbt
+  untemplatized: 1
+  base: http://localhost:3333
+  name: Palmer Oliveira
+  title: Meu Blog
+  description: Um Blog Sobre Deselvolvimento Web
+  image: http://localhost:3333/myImage.jpg
+  ---
+</code></pre>
+<h2 id="vamos-agora-para-os-templates-">Vamos agora para os <strong>Templates</strong>.</h2>
+<h3 id="10-templates-index-hbt">10) templates/index.hbt</h3>
+<p>Aqui aplicamos nosso helper de <code>partials</code> com o header e o footer.</p>
+<pre><code class="lang-markup">  {{&gt; header}}
+    &lt;section&gt;
+      {{{contents}}}
+    &lt;/section&gt;
+    &lt;section&gt;
+      &lt;h1&gt;Lista dos Posts&lt;/h1&gt;
+      &lt;ul&gt;
+        {{#each collections.posts }}
+          &lt;li&gt;
+            &lt;a href=&quot;{{this.path}}/index.html&quot; title=&quot;{{this.title}}&quot;&gt;
+              &lt;h2&gt;{{this.title}}&lt;/h2&gt;
+              &lt;time datetime=&quot;{{ dateFormat this.date }}&quot;&gt;{{ dateFormat this.date }}&lt;/time&gt;
+            &lt;/a&gt;
+          &lt;/li&gt;
+        {{/each}}
+      &lt;/ul&gt;
+    &lt;/section&gt;
+  {{&gt; footer}}
+</code></pre>
+<h3 id="11-templates-partials-header-hbt">11) templates/partials/header.hbt</h3>
+<pre><code class="lang-markup">  &lt;!DOCTYPE html&gt;
+  &lt;html lang=&quot;en&quot;&gt;
+  &lt;head&gt;
+    &lt;meta charset=&quot;UTF-8&quot;&gt;
+    &lt;title&gt;Meu Blog&lt;/title&gt;
+    &lt;link rel=&quot;stylesheet&quot; href=&quot;/css/style.css&quot;&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;header&gt;
+      &lt;h1&gt;Meu Blog&lt;/h1&gt;
+      &lt;p&gt;Assine nosso &lt;a href=&quot;/rss.xml&quot;&gt;rss&lt;/a&gt;.&lt;/p&gt;
+    &lt;/header&gt;
+</code></pre>
+<h3 id="12-templates-partials-footer-hbt">12) templates/partials/footer.hbt</h3>
+<pre><code class="lang-markup">      &lt;footer&gt;
+        made with &lt;a href=&quot;http://www.metalsmith.io/&quot;&gt;metalsmith&lt;/a&gt;
+      &lt;/footer&gt;
+    &lt;/body&gt;
+  &lt;/html&gt;
+</code></pre>
+<h3 id="13-templates-posts-hbt">13) templates/posts.hbt</h3>
+<p>Aqui usaremos também nosso <code>partials</code> e a função para <code>formatação de datas</code>. Note também que temos acesso as <code>tags</code> informadas no corpo dos posts, então podemos dar um <strong>each</strong> neles.</p>
+<pre><code class="lang-markup">  {{&gt; header}}
+    &lt;section&gt;
+      &lt;a href=&quot;/&quot;&gt;Voltar para o Index&lt;/a&gt;
+    &lt;/section&gt;
+    &lt;article&gt;
+      &lt;h1&gt;{{this.title}}&lt;/h1&gt;
+      &lt;time datetime=&quot;{{ dateFormat this.date }}&quot;&gt;{{ dateFormat this.date }}&lt;/time&gt;
+      &lt;ul class=&quot;post__tags&quot;&gt;
+        {{#each this.tags }}
+          &lt;li&gt;
+            &lt;a href=&quot;/tags/{{this}}.html&quot; title=&quot;Posts sobre {{this}}&quot;&gt;{{this}}&lt;/a&gt;
+          &lt;/li&gt;
+        {{/each}}
+      &lt;/ul&gt;
+      &lt;div class=&quot;post__body&quot;&gt;
+        {{{contents}}}
+      &lt;/div&gt;
+    &lt;/article&gt;
+  {{&gt; footer}}
+</code></pre>
+<h3 id="14-templates-tags-hbt">14) templates/tags.hbt</h3>
+<p>Aqui é o template usado pelo plugin de <code>tags</code>.</p>
+<pre><code class="lang-markup">  {{&gt; header}}
+    &lt;section&gt;
+      &lt;a href=&quot;/&quot;&gt;Voltar para o Index&lt;/a&gt;
+    &lt;/section&gt;
+    &lt;section&gt;
+      &lt;h1&gt;Tag: &lt;strong&gt;{{tag}}&lt;/strong&gt;&lt;/h1&gt;
+      &lt;ul&gt;
+      {{#each posts }}
+        &lt;li&gt;
+            &lt;a href=&quot;/{{this.path}}/index.html&quot; title=&quot;{{this.title}}&quot;&gt;
+              &lt;h2&gt;{{this.title}}&lt;/h2&gt;
+              &lt;time datetime=&quot;{{ dateFormat this.date }}&quot;&gt;{{ dateFormat this.date }}&lt;/time&gt;
+            &lt;/a&gt;
+          &lt;/li&gt;
+      {{/each}}
+      &lt;/ul&gt;
+    &lt;/section&gt;
+  {{&gt; footer}}
+</code></pre>
+<h3 id="15-templates-rss-hbt">15) templates/rss.hbt</h3>
+<p>Aqui é o template usado pela página <code>src/rss.xml</code> para criar nosso <strong>rss feed</strong>.</p>
+<pre><code class="lang-markup">  &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;
+  &lt;rss xmlns:dc=&quot;http://purl.org/dc/elements/1.1/&quot; xmlns:content=&quot;http://purl.org/rss/1.0/modules/content/&quot; xmlns:atom=&quot;http://www.w3.org/2005/Atom&quot; version=&quot;2.0&quot; xmlns:geo=&quot;http://www.w3.org/2003/01/geo/wgs84_pos#&quot;&gt;
+    &lt;channel&gt;
+      &lt;title&gt;&lt;![CDATA[{{this.title}}]]&gt;&lt;/title&gt;
+      &lt;atom:link href=&quot;{{this.base}}/rss.xml&quot; rel=&quot;self&quot; type=&quot;application/rss+xml&quot;/&gt;
+      &lt;link&gt;{{this.base}}&lt;/link&gt;
+      &lt;description&gt;&lt;![CDATA[{{this.description}}]]&gt;&lt;/description&gt;
+      &lt;image&gt;
+        &lt;url&gt;{{this.image}}&lt;/url&gt;
+        &lt;title&gt;{{this.title}}&lt;/title&gt;
+        &lt;link&gt;{{this.base}}&lt;/link&gt;
+      &lt;/image&gt;
+      &lt;pubDate&gt;{{dateGMT &#39;new&#39;}}&lt;/pubDate&gt;
+      &lt;lastBuildDate&gt;{{dateGMT &#39;new&#39;}}&lt;/lastBuildDate&gt;
+      &lt;language&gt;en-US&lt;/language&gt;
+      &lt;generator&gt;Metalsmith custom plugin&lt;/generator&gt;
+      &lt;ttl&gt;60&lt;/ttl&gt;
+      {{#each collections.posts }}
+      &lt;item&gt;
+        &lt;title&gt;&lt;![CDATA[{{this.title}}]]&gt;&lt;/title&gt;
+        &lt;description&gt;&lt;![CDATA[{{this.description}}]]&gt;&lt;/description&gt;
+        &lt;link&gt;{{../this.base}}/{{this.path}}/&lt;/link&gt;
+        &lt;guid isPermaLink=&quot;true&quot;&gt;{{../this.base}}/{{this.path}}/&lt;/guid&gt;
+        {{#each this.tags }}
+        &lt;category&gt;&lt;![CDATA[{{this}}]]&gt;&lt;/category&gt;
+        {{/each}}
+        &lt;dc:creator&gt;&lt;![CDATA[{{this.author}}]]&gt;&lt;/dc:creator&gt;
+        &lt;pubDate&gt;{{dateGMT this.date}}&lt;/pubDate&gt;
+        &lt;content:encoded&gt;
+          &lt;![CDATA[{{{contents}}}]]&gt;
+        &lt;/content:encoded&gt;
+      &lt;/item&gt;
+      {{/each}}
+    &lt;/channel&gt;
+  &lt;/rss&gt;
+</code></pre>
+<h3 id="16-src-css-style-css">16) src/css/style.css</h3>
+<p>Vamos colocar um estilo.</p>
+<pre><code class="lang-css">* {
+  padding: 0;
+  margin: 0;
+}
+body {
+  margin: 30px auto;
+  max-width: 600px;
+  text-align: center;
+  font-size: 100%;
+  font-family: &#39;Georgia&#39;, &#39;Arial&#39;, serif;
+  color: #111;
+  background: #fff;
+}
+
+a {
+  color: #999;
+}
+a:hover {
+  color: #FF0050;
+}
+
+header,
+section,
+article,
+footer {
+  margin-top: -1px;
+  padding: 20px;
+  border: solid 1px #eee;
+}
+
+ul li {
+  list-style: none;
+  margin: 20px 0;
+}
+
+ul li a {
+  display: inline-block;
+  margin: 5px;
+  color: #FF0050;
+}
+
+ul li a:hover { color: #FF578B; }
+
+section h1 {
+  font-size: 2em;
+}
+
+time {
+  display: inline-block;
+  padding: 2px 4px;
+}
+
+.post__tags li {
+  display: inline-block;
+}
+.post__tags li a {
+  display: inline-block;
+  margin: 5px 0;
+  padding: 3px 6px;
+  color: #fff;
+  background: #222;
+  text-decoration: none;
+  border-radius: 5px;
+  border: solid 1px #000;
+}
+.post__tags li a:hover {
+  color: #fff;
+  background: #FF0050;
+}
+
+.post__body {
+  margin: 20px 0;
+  padding: 20px 0;
+  text-align: left;
+  border-top: solid 1px #eee;
+}
+.post__body h2, .post__body h3 {
+  margin: 10px 0;
+}
+.post__body ul {
+  padding-left: 40px;
+}
+.post__body ul li {
+  list-style: square;
+}
+.post__body p {
+  margin: 1rem 0;
+  font-size: 1em;
+  line-height: 1.7;
+}
+pre {
+  padding: 20px;
+  background: #313430;
+  color: #64FA0F;
+  border-radius: 4px;
+}
+</code></pre>
+<h3 id="17-finalmente-execute-o-comando-na-raiz-do-diret-rio-blog-">17) Finalmente execute o comando na raiz do diretório <code>blog</code>:</h3>
+<pre><code class="lang-javascript">$ node index.js
+</code></pre>
+<p>Lembra da dica? Vá até a pasta <code>build</code> e dê o comando <code>httpster</code>, então abra o browser em <code>http://localhost:3333/</code>. Confere lá como ficou.</p>
+<p>O post ficou meio longo eu sei, mas usando essa base, você pode criar seu blog com várias features bacanas.</p>
+<p>Neste blog eu uso mais alguns plugins como <code>metalsmith-concat</code>, <code>metalsmith-clean-css</code>, <code>metalsmith-uglify</code>, <code>metalsmith-html-minifier</code>, claro que você pode usar um <code>grunt</code> ou <code>gulp</code> da vida pra isso.</p>
+<p>Se tiver alguma dúvida, ficarei feliz em ajuda-lo!</p>
+<p>Espero que tenham gostado. That&#39;s it !</p>
+]]>
         </content:encoded>
       </item>
-      
       <item>
         <title><![CDATA[Metalsmith, um extremamente simples gerador de páginas estáticas feito em javascript]]></title>
         <description><![CDATA[Tomei coragem e resolvi criar meu blog, e escolhi o Metalsmith por ser em javascript, minha linguagem favorita.]]></description>
         <link>http://expalmer.github.io/metalsmith-um-extremamente-simples-gerador-de-paginas-estaticas-feito-em-javascript/</link>
         <guid isPermaLink="true">http://expalmer.github.io/metalsmith-um-extremamente-simples-gerador-de-paginas-estaticas-feito-em-javascript/</guid>
-        
         <category><![CDATA[metalsmith]]></category>
-        
         <category><![CDATA[javascript]]></category>
-        
         <category><![CDATA[nodejs]]></category>
-        
         <dc:creator><![CDATA[Palmer Oliveira]]></dc:creator>
         <pubDate>Wed, 24 Sep 2014 17:39:06 GMT</pubDate>
         <content:encoded>
-          <![CDATA[]]>
+          <![CDATA[<p>Resolvi criar meu blog e escolhi o Metalsmith por ser em javascript, minha linguagem favorita.</p>
+<p>Hoje existem alguns geradores de sites estáticos super legais, como o <a href="http://jekyllrb.com/">jekyll</a>,
+mas resolvi procurar algo feito em javascript e encontrei o <a href="http://metalsmith.io/">Metalsmith</a> criado pela turma do <a href="https://segment.io/">Segment.io</a>.</p>
+<p>Vale lembrar que temos outro gerador em javascript muito bacana, o <a href="https://github.com/es6rocks/harmonic">harmonic</a> feito pelo <a href="https://twitter.com/jaydson">@jaydson</a>.
+Logo vou me aventurar no harmonic.</p>
+<h2 id="como-o-metalsmith-funciona-">Como o Metalsmith funciona ?</h2>
+<p>O Metalsmith roda com <code>nodejs</code>, então já sabe que precisa de node na sua máquina.</p>
+<p>Toda lógica do Metalsmith é manipulada através de plugins, ou seja, você simplesmente chama métodos encadeados e pronto!</p>
+<p>O Metalsmith faz 3 coisinhas:</p>
+<ol>
+<li>Lê todos os arquivos no diretório origem <code>src</code>.</li>
+<li>Chama os cada um dos métodos encadeados manipulando os arquivos.</li>
+<li>Escreve o resultado no diretótio destino <code>build</code>. ( Você escolhe o nome da pasta destino ).</li>
+</ol>
+<h2 id="vamos-criar-um-pequeno-blog-com-metalsmith-">Vamos criar um pequeno blog com Metalsmith.</h2>
+<h3 id="1-estrutura-de-arquivos-do-blog-">1 ) Estrutura de arquivos do Blog.</h3>
+<pre><code class="lang-javascript">- blog
+---- index.js
+---- package.json
+---- src
+-------- index.md
+-------- posts
+-------------- post-1.md
+-------------- post-2.md
+---- templates
+-------------- index.hbt
+-------------- posts.hbt
+</code></pre>
+<h3 id="2-package-json">2) package.json</h3>
+<pre><code class="lang-javascript">{
+  &quot;name&quot;: &quot;blog&quot;,
+  &quot;description&quot;: &quot;meu blog legal&quot;,
+  &quot;version&quot;: &quot;0.0.1&quot;,
+  &quot;dependencies&quot;: {
+    &quot;handlebars&quot;: &quot;^2.0.0&quot;,
+    &quot;metalsmith&quot;: &quot;^0.11.0&quot;,
+    &quot;metalsmith-collections&quot;: &quot;^0.6.0&quot;,
+    &quot;metalsmith-markdown&quot;: &quot;^0.2.1&quot;,
+    &quot;metalsmith-permalinks&quot;: &quot;^0.4.0&quot;,
+    &quot;metalsmith-templates&quot;: &quot;^0.5.2&quot;,
+    &quot;metasmith&quot;: &quot;0.0.1&quot;
+  }
+}
+</code></pre>
+<p>Vamos instalar o Metalsmith e mais 5 dependências essenciais para um blog bacana.</p>
+<ul>
+<li><strong>metalsmith-collections</strong>: Cria um objeto chamado <code>collections</code> com todos os posts.</li>
+<li><strong>metalsmith-markdown</strong>: Interpreta nossos arquivos <code>.md</code>.</li>
+<li><strong>metalsmith-permalinks</strong>: Muda o nome original do arquivo para uma url amigável.</li>
+<li><strong>metalsmith-templates</strong>: Permite usar um template engine.</li>
+<li><strong>handlebars</strong>: Nosso template engine.</li>
+</ul>
+<p>Aproveite e já instale as dependências. Dê o comando na raiz do diretório <code>blog</code>.</p>
+<pre><code class="lang-javascript">$ npm install
+</code></pre>
+<h2 id="agora-vamos-criar-as-nossas-p-ginas-de-fato-">Agora vamos criar as nossas páginas de fato.</h2>
+<h3 id="3-blog-src-index-md">3) blog/src/index.md</h3>
+<pre><code class="lang-javascript">---
+template: index.hbt
+---
+
+Corpo da página index
+</code></pre>
+<h3 id="4-blog-src-posts-post-1-md">4) blog/src/posts/post-1.md</h3>
+<pre><code class="lang-javascript">---
+title: Meu Primeiro Post com Metalsmith
+template: posts.hbt
+---
+
+Corpo do Post 1
+</code></pre>
+<h3 id="5-blog-src-posts-post-2-md">5) blog/src/posts/post-2.md</h3>
+<pre><code class="lang-javascript">---
+title: Meu Segundo Post
+template: posts.hbt
+---
+
+Corpo do Post 2
+</code></pre>
+<h2 id="agora-criaremos-nossos-templates-em-handlebars-">Agora criaremos nossos templates em handlebars.</h2>
+<h3 id="6-blog-templates-index-hbt">6) blog/templates/index.hbt</h3>
+<pre><code class="lang-markup">&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+  &lt;meta charset=&quot;UTF-8&quot;&gt;
+  &lt;title&gt;Blog Index&lt;/title&gt;
+  &lt;link rel=&quot;stylesheet&quot; href=&quot;css/style.css&quot;&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;header&gt;
+    &lt;h1&gt;Index&lt;/h1&gt;
+  &lt;/header&gt;
+  &lt;section&gt;
+    {{{contents}}}
+  &lt;/section&gt;
+  &lt;section&gt;
+    &lt;h2&gt;Lista dos Posts&lt;/h2&gt;
+    &lt;ul&gt;
+      {{#each collections.posts }}
+        &lt;li&gt;
+          &lt;a href=&quot;{{this.path}}/index.html&quot; title=&quot;{{this.path}}&quot;&gt;{{this.title}}&lt;/a&gt;
+        &lt;/li&gt;
+      {{/each}}
+    &lt;/ul&gt;
+  &lt;/section&gt;
+  &lt;footer&gt;
+    made with &lt;a href=&quot;http://www.metalsmith.io/&quot;&gt;metalsmith&lt;/a&gt;
+  &lt;/footer&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<h3 id="7-blog-templates-posts-hbt">7) blog/templates/posts.hbt</h3>
+<pre><code class="lang-markup">&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+  &lt;meta charset=&quot;UTF-8&quot;&gt;
+  &lt;title&gt;Blog Posts&lt;/title&gt;
+  &lt;link rel=&quot;stylesheet&quot; href=&quot;../css/style.css&quot;&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;header&gt;
+    &lt;a href=&quot;../index.html&quot;&gt;Voltar para o Index&lt;/a&gt;
+  &lt;/header&gt;
+  &lt;article&gt;
+    &lt;h1&gt;{{this.title}}&lt;/h1&gt;
+    {{{contents}}}
+  &lt;/article&gt;
+  &lt;footer&gt;
+    made with &lt;a href=&quot;http://www.metalsmith.io/&quot;&gt;metalsmith&lt;/a&gt;
+  &lt;/footer&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<h2 id="vamos-dar-um-estilo-">Vamos dar um estilo.</h2>
+<h3 id="8-blog-src-css-style-css">8) blog/src/css/style.css</h3>
+<pre><code class="lang-css">* {
+  padding: 0;
+  margin: 0;
+}
+body {
+  margin: 30px auto;
+  max-width: 600px;
+  text-align: center;
+  font-size: 100%;
+  font-family: &#39;Georgia&#39;, &#39;Arial&#39;, serif;
+  color: #111;
+  background: #fff;
+}
+
+a {
+  color: #999;
+}
+
+header,
+section,
+article,
+footer {
+  margin-top: -1px;
+  padding: 20px;
+  border: solid 1px #eee;
+}
+
+ul li {
+  list-style: none;
+}
+
+ul li a {
+  display: inline-block;
+  margin: 5px;
+  color: #FF0050;
+}
+</code></pre>
+<h2 id="agora-s-criar-nosso-arquivo-principal-chamando-o-metalsmith-">Agora é só criar nosso arquivo principal chamando o Metalsmith.</h2>
+<h3 id="9-blog-index-js">9) blog/index.js</h3>
+<pre><code class="lang-javascript">var Metalsmith   = require(&#39;metalsmith&#39;);
+var collections  = require(&#39;metalsmith-collections&#39;);
+var markdown     = require(&#39;metalsmith-markdown&#39;);
+var templates    = require(&#39;metalsmith-templates&#39;);
+var permalinks   = require(&#39;metalsmith-permalinks&#39;);
+
+Metalsmith(__dirname)
+  .use(collections({             // nos dará acesso a um objeto chamado &#39;collections&#39; ...
+      posts: {                   // ... com todos os posts
+          pattern: &#39;posts/*.md&#39;, // aqui é o lugar onde estão nossos posts
+          sortBy: &#39;date&#39;,        // ordenar por data
+          reverse: true          // ordenar da data mais recente para a mais antiga
+      }
+  }))
+  .use(markdown())        // vai ler todos arquivos .md e transformar em um objeto
+  .use(permalinks({       // vai mudar o arquivo destino no padrão {title}/index.html
+      pattern: &#39;:title&#39;,
+      relative: false
+  }))
+  .use(templates(&#39;handlebars&#39;)) // nossos objetos serão passados para o handlebars
+  .destination(&#39;./build&#39;)       // diretório destino
+  .build(function(err, files) { // escreve os aquivos no diretório build
+    if (err) { throw err; }     // um handler de erro, sempre é bom
+  });
+</code></pre>
+<h3 id="9-finalmente-execute-o-comando-na-raiz-do-diret-rio-blog-">9) Finalmente execute o comando na raiz do diretório <code>blog</code>:</h3>
+<pre><code class="lang-javascript">$ node index.js
+</code></pre>
+<h3 id="10-v-at-o-diret-rio-build-e-abra-o-arquivo-index-html-no-seu-browser-favorito-e-est-pronto-">10) Vá até o diretório <code>build</code> e abra o arquivo <code>index.html</code> no seu browser favorito, e está pronto!</h3>
+<p>Em resumo, o Metalsmith vai ler a pasta <code>src</code> criar um nova pasta chamada <code>build</code> com o resultado de tudo feito pelos plugins.</p>
+<p>Eu não expliquei detalhe por detalhe, mas sei que você só fazendo esse exemplo vai sacar como as coisas funcionam.</p>
+<p>Aconselho a dar uma olhada no código de algum plugin, e veja como é fácil criar coisas no Metalsmith. Eu inclusive contribui para o plugin <a href="https://github.com/totocaster/metalsmith-tags">metalsmith-tags</a> e criei outro para colocar <code>gists</code> dentro do blog <a href="https://github.com/expalmer/metalsmith-gist">metalsmith-gist</a>.</p>
+<p>Logo irei fazer um novo post com a estrutura completa de um blog e criando plugins no Metalsmith.</p>
+<p>Espero que tenham gostado. That&#39;s it !</p>
+]]>
         </content:encoded>
       </item>
-      
     </channel>
   </rss>

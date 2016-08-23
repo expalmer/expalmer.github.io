@@ -1,1 +1,0 @@
-# My Blog [expalmer.github.io](http://expalmer.github.io)
